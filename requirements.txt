@@ -1,0 +1,7 @@
+# LTX2 Efficient Video Sampler - Requirements
+
+# Optional: GPU temperature monitoring
+# Install for thermal auto-scaling feature
+pynvml>=11.5.0
+
+# Note: Core dependencies (torch, comfy) are provided by ComfyUI
