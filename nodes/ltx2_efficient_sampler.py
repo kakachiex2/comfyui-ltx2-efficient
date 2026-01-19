@@ -92,16 +92,39 @@ class LTX2EfficientSampler:
     def IS_CHANGED(cls, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method, audio_passthrough):
         """
         ComfyUI caching mechanism.
-        Returns a hash of inputs that affect the output.
-        If this returns the same value as the previous run, cached output is used.
+        Returns a unique value when output would change.
+        Same value = use cached output, Different value = re-execute.
+        
+        For complex inputs (model, latent, conditioning), we use their id() 
+        which changes when the object changes.
         """
         import hashlib
         
-        # Create a fingerprint of the key parameters that affect output
-        # Note: We include seed so different seeds produce different results
-        # We exclude target_temp and thermal_throttle as they don't affect output, only speed
-        fingerprint = f"{seed}_{steps}_{cfg}_{sampler_name}_{scheduler}_{denoise}_{frame_stride}_{freeze_ratio}_{interpolation_method}_{audio_passthrough}"
+        # Include ALL inputs that affect the output
+        # For complex objects, use id() which is unique per object instance
+        fingerprint_parts = [
+            # Complex objects - use object identity
+            str(id(model)),
+            str(id(latent_video)),
+            str(id(positive)),
+            str(id(negative)),
+            # Primitive values that affect output
+            str(seed),
+            str(steps),
+            str(cfg),
+            str(sampler_name),
+            str(scheduler),
+            str(denoise),
+            str(optimization_preset),
+            str(frame_stride),
+            str(attention_window),  # Added - affects patching
+            str(freeze_ratio),
+            str(interpolation_method),
+            str(audio_passthrough),
+            # Excluded: target_temp, thermal_throttle (only affect speed, not output)
+        ]
         
+        fingerprint = "_".join(fingerprint_parts)
         return hashlib.md5(fingerprint.encode()).hexdigest()
 
     def sample(self, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method, audio_passthrough):
@@ -109,6 +132,7 @@ class LTX2EfficientSampler:
         
         # Audio passthrough: detect and preserve audio latent if present
         audio_latent = None
+        create_dummy_audio = False
         if audio_passthrough:
             # Check if latent_video contains audio (tuple format from LTXVImgToVideo)
             if isinstance(latent_video.get("samples"), tuple):
@@ -117,7 +141,9 @@ class LTX2EfficientSampler:
                 latent_video = {"samples": video_samples}
                 print(f"[LTX2Efficient] Audio passthrough enabled. Audio latent preserved.")
             else:
-                print(f"[LTX2Efficient] Audio passthrough enabled but no audio found in input.")
+                # No audio found - we'll create a dummy audio tensor at the end
+                create_dummy_audio = True
+                print(f"[LTX2Efficient] Audio passthrough enabled but no audio in input. Will create dummy audio for LTXVSeparateAVLatent compatibility.")
         
         # Apply Optimization Preset (override manual settings unless "Custom")
         preset = OPTIMIZATION_PRESETS.get(optimization_preset, {})
@@ -154,12 +180,127 @@ class LTX2EfficientSampler:
         
         # 1. Keyframe Selection
         samples = latent_video["samples"]
-        # Assume (Frames, Channels, Height, Width)
-        original_frames_count = samples.shape[0]
         
-        # Select indices
-        indices = torch.arange(0, original_frames_count, frame_stride)
-        keyframes = samples[indices]
+        # LTX Video latent shape can be:
+        # - 5D: (Batch, Channels, Frames, Height, Width) - standard LTX format
+        # - 4D: (Frames, Channels, Height, Width) - some sources
+        # ComfyUI/LTXVConcatAVLatent may use NestedTensor wrapper
+        
+        # Convert NestedTensor to regular tensor if needed
+        # Try multiple methods since NestedTensor API varies by PyTorch version
+        is_nested = str(type(samples).__name__) == 'NestedTensor' or 'nested' in str(type(samples)).lower()
+        converted = False  # Track if NestedTensor was successfully converted
+        
+        if is_nested:
+            print(f"[LTX2Efficient] Detected NestedTensor, attempting conversion...")
+            
+            # Method 1: Try .values() 
+            if hasattr(samples, 'values') and callable(samples.values):
+                try:
+                    samples = samples.values()
+                    converted = True
+                    print(f"[LTX2Efficient] Converted via .values()")
+                except:
+                    pass
+            
+            # Method 2: Try ._values
+            if not converted and hasattr(samples, '_values'):
+                try:
+                    samples = samples._values
+                    converted = True
+                    print(f"[LTX2Efficient] Converted via ._values")
+                except:
+                    pass
+            
+            # Method 3: Try .to_padded_tensor() - common NestedTensor method
+            if not converted and hasattr(samples, 'to_padded_tensor'):
+                try:
+                    samples = samples.to_padded_tensor(0.0)
+                    converted = True
+                    print(f"[LTX2Efficient] Converted via .to_padded_tensor()")
+                except:
+                    pass
+            
+            # Method 4: Try unbind and stack - works for list-like NestedTensors
+            if not converted and hasattr(samples, 'unbind'):
+                try:
+                    tensors = samples.unbind()
+                    samples = torch.stack(tensors)
+                    converted = True
+                    print(f"[LTX2Efficient] Converted via .unbind() + stack")
+                except:
+                    pass
+            
+            # Method 5: Direct clone - sometimes works
+            if not converted:
+                try:
+                    samples = samples.clone().detach()
+                    converted = True
+                    print(f"[LTX2Efficient] Converted via .clone().detach()")
+                except:
+                    pass
+            
+            if not converted:
+                print(f"[LTX2Efficient] Warning: Could not convert NestedTensor, proceeding with original")
+        
+        # Ensure we have a contiguous tensor for index operations (only if method exists)
+        if hasattr(samples, 'is_contiguous') and not samples.is_contiguous():
+            samples = samples.contiguous()
+        
+        # Get the actual shape
+        shape = samples.shape
+        ndims = len(shape)
+        
+        # Track if we should skip striding (for unconvertible NestedTensors)
+        skip_striding = is_nested and not converted
+        
+        # If NestedTensor conversion failed, we need to skip frame striding
+        # because slicing operations will break the tensor structure
+        if skip_striding:
+            print(f"[LTX2Efficient] Skipping frame stride for NestedTensor - passing through unchanged")
+            keyframes = samples
+            original_frames_count = shape[2] if ndims == 5 else (shape[0] if ndims == 4 else 1)
+            indices = list(range(original_frames_count))
+        else:
+            # Normal frame striding for regular tensors
+            try:
+                if ndims == 5:
+                    # Standard LTX format: (B, C, F, H, W)
+                    original_frames_count = shape[2]  # Frames at dim 2
+                    
+                    indices = list(range(0, original_frames_count, frame_stride))
+                    keyframes = samples[:, :, indices, :, :]
+                    
+                elif ndims == 4:
+                    # Format: (F, C, H, W) - frames at dim 0
+                    original_frames_count = shape[0]
+                    
+                    indices = list(range(0, original_frames_count, frame_stride))
+                    keyframes = samples[indices, :, :, :]
+                    
+                    # Convert 4D to 5D for LTX model compatibility: (F,C,H,W) -> (1,C,F,H,W)
+                    keyframes = keyframes.permute(1, 0, 2, 3).unsqueeze(0)
+                    print(f"[LTX2Efficient] Converted 4D tensor to 5D: {keyframes.shape}")
+                    
+                elif ndims == 3:
+                    # Format: (C, H, W) - single frame, expand to 5D
+                    print(f"[LTX2Efficient] Single frame 3D tensor detected, expanding to 5D")
+                    original_frames_count = 1
+                    indices = [0]
+                    keyframes = samples.unsqueeze(0).unsqueeze(2)  # (C,H,W) -> (1,C,1,H,W)
+                    
+                else:
+                    raise ValueError(f"[LTX2Efficient] Unexpected latent shape: {shape}. Expected 3D, 4D or 5D tensor.")
+                    
+            except (IndexError, RuntimeError, TypeError) as e:
+                # Final fallback: skip striding entirely
+                print(f"[LTX2Efficient] Warning: Indexing failed ({e}). Skipping frame stride...")
+                keyframes = samples
+                original_frames_count = shape[2] if ndims >= 5 else shape[0] if ndims >= 4 else 1
+                indices = list(range(original_frames_count))
+        
+        print(f"[LTX2Efficient] Keyframe selection: {original_frames_count} frames -> {len(indices)} keyframes (stride={frame_stride})")
+        print(f"[LTX2Efficient] Keyframes shape: {keyframes.shape}")
         
         kf_latent = {"samples": keyframes}
         
@@ -268,21 +409,53 @@ class LTX2EfficientSampler:
         # 4. Interpolate
         result_samples = result["samples"]
         print(f"[LTX2Efficient] Interpolating with method: {interpolation_method}")
-        full_samples = interpolate(result_samples, frame_stride, method=interpolation_method)
         
-        # Handle potential length mismatch due to stride not dividing perfectly
-        if full_frames_count := full_samples.shape[0]:
-             if full_frames_count > original_frames_count:
-                 full_samples = full_samples[:original_frames_count]
+        # Handle 5D (B,C,F,H,W) vs 4D (F,C,H,W) for interpolation
+        is_5d = result_samples.ndim == 5
+        
+        if is_5d:
+            # For 5D, we need to interpolate along the frame dimension (dim 2)
+            # Squeeze batch, interpolate frames, then unsqueeze
+            # Assume batch=1 for now (standard case)
+            batch_size = result_samples.shape[0]
+            frames_5d = result_samples[0]  # (C, F, H, W)
+            frames_transposed = frames_5d.permute(1, 0, 2, 3)  # (F, C, H, W) for interpolation
+            full_frames = interpolate(frames_transposed, frame_stride, method=interpolation_method)
+            # Transpose back and add batch
+            full_frames_5d = full_frames.permute(1, 0, 2, 3).unsqueeze(0)  # (1, C, F, H, W)
+            full_samples = full_frames_5d
+            
+            # Length check for 5D
+            full_frames_count = full_samples.shape[2]  # Frames at dim 2
+            if full_frames_count > original_frames_count:
+                full_samples = full_samples[:, :, :original_frames_count, :, :]
+        else:
+            # 4D case (F, C, H, W)
+            full_samples = interpolate(result_samples, frame_stride, method=interpolation_method)
+            
+            # Handle potential length mismatch
+            full_frames_count = full_samples.shape[0]
+            if full_frames_count > original_frames_count:
+                full_samples = full_samples[:original_frames_count]
         
         # Return with or without audio
-        if audio_passthrough and audio_latent is not None:
-            # Return combined format for LTXVSeparateAVLatent compatibility
-            combined_samples = (full_samples, audio_latent["samples"])
-            print(f"[LTX2Efficient] Returning combined video+audio latent.")
-            return ({"samples": combined_samples},)
-        else:
-            return ({"samples": full_samples},)
+        if audio_passthrough:
+            if audio_latent is not None:
+                # Return combined format for LTXVSeparateAVLatent compatibility
+                combined_samples = (full_samples, audio_latent["samples"])
+                print(f"[LTX2Efficient] Returning combined video+audio latent.")
+                return ({"samples": combined_samples},)
+            elif create_dummy_audio:
+                # Create dummy audio tensor (zeros) for LTXVSeparateAVLatent compatibility
+                # LTXVAudioDecode will just decode silence which is fine
+                # Audio shape: typically similar to video but may differ - create minimal placeholder
+                # Based on LTXV format: audio is a separate tensor, we'll create zeros matching video batch
+                dummy_audio = torch.zeros(1, 128, 1, device=full_samples.device, dtype=full_samples.dtype)
+                combined_samples = (full_samples, dummy_audio)
+                print(f"[LTX2Efficient] Returning video + dummy audio (no audio in source).")
+                return ({"samples": combined_samples},)
+        
+        return ({"samples": full_samples},)
 
 class LTX2Patcher:
     """
