@@ -32,9 +32,9 @@ class LTX2TemporalVAEDecode:
         if not temporal_tiling or frames_count <= tile_size:
              # Regular decode (or let the internal VAE handle spatial tiling if configured)
              if spatial_tiling:
-                 return nodes.VAEDecodeTiled().decode(samples, vae)
+                 return nodes.VAEDecodeTiled().decode(vae, samples)
              else:
-                 return nodes.VAEDecode().decode(samples, vae)
+                 return nodes.VAEDecode().decode(vae, samples)
         
         # Performing Temporal Tiling
         decoded_frames = []
@@ -57,9 +57,9 @@ class LTX2TemporalVAEDecode:
             # We can enable spatial tiling for the chunk if requested
             try:
                 if spatial_tiling:
-                    image_chunk = nodes.VAEDecodeTiled().decode(chunk_samples, vae)[0]
+                    image_chunk = nodes.VAEDecodeTiled().decode(vae, chunk_samples)[0]
                 else:
-                    image_chunk = nodes.VAEDecode().decode(chunk_samples, vae)[0]
+                    image_chunk = nodes.VAEDecode().decode(vae, chunk_samples)[0]
             except Exception as e:
                 print(f"[LTX2Efficient] Error decoding chunk {i}: {e}")
                 # Try to salvage or re-raise
