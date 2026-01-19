@@ -80,15 +80,44 @@ class LTX2EfficientSampler:
                 "freeze_ratio": ("FLOAT", {"default": 0.3, "min": 0.0, "max": 1.0, "step": 0.05}),
                 "thermal_throttle": ("BOOLEAN", {"default": True}),
                 "interpolation_method": (["linear", "slerp", "motion"], {"default": "slerp"}),
+                "audio_passthrough": ("BOOLEAN", {"default": False}),
             }
         }
 
     RETURN_TYPES = ("LATENT",)
     FUNCTION = "sample"
     CATEGORY = "video/ltx2"
+    
+    @classmethod
+    def IS_CHANGED(cls, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method, audio_passthrough):
+        """
+        ComfyUI caching mechanism.
+        Returns a hash of inputs that affect the output.
+        If this returns the same value as the previous run, cached output is used.
+        """
+        import hashlib
+        
+        # Create a fingerprint of the key parameters that affect output
+        # Note: We include seed so different seeds produce different results
+        # We exclude target_temp and thermal_throttle as they don't affect output, only speed
+        fingerprint = f"{seed}_{steps}_{cfg}_{sampler_name}_{scheduler}_{denoise}_{frame_stride}_{freeze_ratio}_{interpolation_method}_{audio_passthrough}"
+        
+        return hashlib.md5(fingerprint.encode()).hexdigest()
 
-    def sample(self, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method):
+    def sample(self, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method, audio_passthrough):
         import time
+        
+        # Audio passthrough: detect and preserve audio latent if present
+        audio_latent = None
+        if audio_passthrough:
+            # Check if latent_video contains audio (tuple format from LTXVImgToVideo)
+            if isinstance(latent_video.get("samples"), tuple):
+                video_samples, audio_samples = latent_video["samples"]
+                audio_latent = {"samples": audio_samples}
+                latent_video = {"samples": video_samples}
+                print(f"[LTX2Efficient] Audio passthrough enabled. Audio latent preserved.")
+            else:
+                print(f"[LTX2Efficient] Audio passthrough enabled but no audio found in input.")
         
         # Apply Optimization Preset (override manual settings unless "Custom")
         preset = OPTIMIZATION_PRESETS.get(optimization_preset, {})
@@ -246,7 +275,14 @@ class LTX2EfficientSampler:
              if full_frames_count > original_frames_count:
                  full_samples = full_samples[:original_frames_count]
         
-        return ({"samples": full_samples},)
+        # Return with or without audio
+        if audio_passthrough and audio_latent is not None:
+            # Return combined format for LTXVSeparateAVLatent compatibility
+            combined_samples = (full_samples, audio_latent["samples"])
+            print(f"[LTX2Efficient] Returning combined video+audio latent.")
+            return ({"samples": combined_samples},)
+        else:
+            return ({"samples": full_samples},)
 
 class LTX2Patcher:
     """
