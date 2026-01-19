@@ -80,7 +80,6 @@ class LTX2EfficientSampler:
                 "freeze_ratio": ("FLOAT", {"default": 0.3, "min": 0.0, "max": 1.0, "step": 0.05}),
                 "thermal_throttle": ("BOOLEAN", {"default": True}),
                 "interpolation_method": (["linear", "slerp", "motion"], {"default": "slerp"}),
-                "audio_passthrough": ("BOOLEAN", {"default": False}),
             }
         }
 
@@ -89,7 +88,7 @@ class LTX2EfficientSampler:
     CATEGORY = "video/ltx2"
     
     @classmethod
-    def IS_CHANGED(cls, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method, audio_passthrough):
+    def IS_CHANGED(cls, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method):
         """
         ComfyUI caching mechanism.
         Returns a unique value when output would change.
@@ -117,33 +116,20 @@ class LTX2EfficientSampler:
             str(denoise),
             str(optimization_preset),
             str(frame_stride),
-            str(attention_window),  # Added - affects patching
+            str(attention_window),
             str(freeze_ratio),
             str(interpolation_method),
-            str(audio_passthrough),
             # Excluded: target_temp, thermal_throttle (only affect speed, not output)
         ]
         
         fingerprint = "_".join(fingerprint_parts)
         return hashlib.md5(fingerprint.encode()).hexdigest()
 
-    def sample(self, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method, audio_passthrough):
+    def sample(self, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method):
         import time
         
-        # Audio passthrough: detect and preserve audio latent if present
-        audio_latent = None
-        create_dummy_audio = False
-        if audio_passthrough:
-            # Check if latent_video contains audio (tuple format from LTXVImgToVideo)
-            if isinstance(latent_video.get("samples"), tuple):
-                video_samples, audio_samples = latent_video["samples"]
-                audio_latent = {"samples": audio_samples}
-                latent_video = {"samples": video_samples}
-                print(f"[LTX2Efficient] Audio passthrough enabled. Audio latent preserved.")
-            else:
-                # No audio found - we'll create a dummy audio tensor at the end
-                create_dummy_audio = True
-                print(f"[LTX2Efficient] Audio passthrough enabled but no audio in input. Will create dummy audio for LTXVSeparateAVLatent compatibility.")
+        # NOTE: For combined audio-video latents from LTXVConcatAVLatent, use LTX2SeparateAVLatent
+        # node first to extract video-only latent, then recombine with LTX2CombineAVLatent after.
         
         # Apply Optimization Preset (override manual settings unless "Custom")
         preset = OPTIMIZATION_PRESETS.get(optimization_preset, {})
@@ -438,23 +424,7 @@ class LTX2EfficientSampler:
             if full_frames_count > original_frames_count:
                 full_samples = full_samples[:original_frames_count]
         
-        # Return with or without audio
-        if audio_passthrough:
-            if audio_latent is not None:
-                # Return combined format for LTXVSeparateAVLatent compatibility
-                combined_samples = (full_samples, audio_latent["samples"])
-                print(f"[LTX2Efficient] Returning combined video+audio latent.")
-                return ({"samples": combined_samples},)
-            elif create_dummy_audio:
-                # Create dummy audio tensor (zeros) for LTXVSeparateAVLatent compatibility
-                # LTXVAudioDecode will just decode silence which is fine
-                # Audio shape: typically similar to video but may differ - create minimal placeholder
-                # Based on LTXV format: audio is a separate tensor, we'll create zeros matching video batch
-                dummy_audio = torch.zeros(1, 128, 1, device=full_samples.device, dtype=full_samples.dtype)
-                combined_samples = (full_samples, dummy_audio)
-                print(f"[LTX2Efficient] Returning video + dummy audio (no audio in source).")
-                return ({"samples": combined_samples},)
-        
+        # Return video-only latent (use LTX2CombineAVLatent to recombine with audio if needed)
         return ({"samples": full_samples},)
 
 class LTX2Patcher:

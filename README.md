@@ -31,6 +31,19 @@ A high-performance custom node for LTX2 video generation in ComfyUI, designed to
 ### 📦 Additional Nodes
 
 - **LTX2 Temporal VAE Decode**: Memory-efficient VAE decoding with temporal tiling
+- **LTX2 Separate Audio/Video Latent**: Extract video and audio from combined latents (for use with LTXVConcatAVLatent)
+- **LTX2 Combine Audio/Video Latent**: Recombine processed video with audio for downstream nodes
+- **LTX2 Empty Audio Latent**: Generate placeholder audio latent matching video duration
+
+### 🎵 Audio-Video Workflow
+
+For workflows using `LTXVConcatAVLatent` or MMAudio:
+
+```
+[LTXVConcatAVLatent] → [LTX2 Separate AV] → [LTX2 Efficient Sampler] → [LTX2 Combine AV] → [Decode]
+                                         ↓                              ↑
+                                  [Audio Pipeline (optional)] ──────────┘
+```
 
 ## 📋 Requirements
 
