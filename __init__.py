@@ -5,6 +5,7 @@ from .nodes.ltx2_latent_utils import (
     LTX2CombineAVLatent,
     LTX2EmptyAudioLatent
 )
+from .nodes.ltx2_experimental_sampler import LTX2ExperimentalKeyframeSampler
 
 NODE_CLASS_MAPPINGS = {
     "LTX2EfficientSampler": LTX2EfficientSampler,
@@ -12,6 +13,7 @@ NODE_CLASS_MAPPINGS = {
     "LTX2SeparateAVLatent": LTX2SeparateAVLatent,
     "LTX2CombineAVLatent": LTX2CombineAVLatent,
     "LTX2EmptyAudioLatent": LTX2EmptyAudioLatent,
+    "LTX2ExperimentalKeyframeSampler": LTX2ExperimentalKeyframeSampler,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -20,4 +22,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LTX2SeparateAVLatent": "LTX2 Separate Audio/Video Latent",
     "LTX2CombineAVLatent": "LTX2 Combine Audio/Video Latent",
     "LTX2EmptyAudioLatent": "LTX2 Empty Audio Latent",
+    "LTX2ExperimentalKeyframeSampler": "LTX2 Experimental Keyframe Sampler ⚠️",
 }

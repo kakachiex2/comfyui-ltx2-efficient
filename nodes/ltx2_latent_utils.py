@@ -6,6 +6,31 @@ Audio-Video Latent Separation and Combination nodes for efficient processing.
 import torch
 
 
+class AVLatentWrapper:
+    """
+    A wrapper class that mimics NestedTensor's unbind() method.
+    
+    This allows LTX2CombineAVLatent output to be compatible with
+    LTXVSeparateAVLatent which expects .unbind() to return [video, audio] tensors.
+    """
+    
+    def __init__(self, video_tensor, audio_tensor):
+        self.video = video_tensor
+        self.audio = audio_tensor
+        # Store shape info for compatibility checks
+        self._shape = video_tensor.shape  # Report video shape
+    
+    def unbind(self):
+        """Return video and audio tensors like NestedTensor.unbind()"""
+        return [self.video, self.audio]
+    
+    @property
+    def shape(self):
+        return self._shape
+    
+    def __repr__(self):
+        return f"AVLatentWrapper(video={self.video.shape}, audio={self.audio.shape})"
+
 class LTX2SeparateAVLatent:
     """
     Separates combined audio-video latent into individual video and audio latents.
@@ -32,10 +57,11 @@ class LTX2SeparateAVLatent:
     DESCRIPTION = "Separates combined audio-video latent for efficient processing. Route video to LTX2EfficientSampler."
 
     def _is_nested_tensor(self, tensor):
-        """Check if tensor is a NestedTensor."""
+        """Check if tensor is a NestedTensor or AVLatentWrapper."""
         type_name = str(type(tensor).__name__)
         type_str = str(type(tensor)).lower()
-        return type_name == 'NestedTensor' or 'nested' in type_str
+        # Recognize both NestedTensor and our custom AVLatentWrapper
+        return type_name == 'NestedTensor' or 'nested' in type_str or type_name == 'AVLatentWrapper'
 
     def _extract_from_nested(self, nested_tensor):
         """
@@ -219,20 +245,13 @@ class LTX2CombineAVLatent:
         print(f"[LTX2CombineAVLatent] Combining Video: {video_samples.shape}, Audio: {audio_samples.shape}")
         
         if output_format == "nested_tensor":
-            # Create NestedTensor - compatible with LTXVSeparateAVLatent and LTXVDecodeAV
+            # Use AVLatentWrapper - compatible with LTXVSeparateAVLatent and LTXVDecodeAV
             # The standard LTX nodes expect .unbind() to return [video, audio] tensors
-            try:
-                # Remove batch dim for nested tensor (it expects list of tensors without batch)
-                video_for_nest = video_samples.squeeze(0) if video_samples.dim() == 5 else video_samples
-                audio_for_nest = audio_samples.squeeze(0) if audio_samples.dim() == 4 else audio_samples
-                
-                combined = torch.nested.nested_tensor([video_for_nest, audio_for_nest])
-                print(f"[LTX2CombineAVLatent] Created NestedTensor from Video: {video_for_nest.shape}, Audio: {audio_for_nest.shape}")
-                return ({"samples": combined},)
-            except Exception as e:
-                print(f"[LTX2CombineAVLatent] NestedTensor creation failed: {e}. Falling back to tuple.")
-                combined = (video_samples, audio_samples)
-                return ({"samples": combined},)
+            # Note: We use our wrapper because torch.nested.nested_tensor requires
+            # same-dimension tensors, but video is 5D and audio is 4D
+            combined = AVLatentWrapper(video_samples, audio_samples)
+            print(f"[LTX2CombineAVLatent] Created AVLatentWrapper with Video: {video_samples.shape}, Audio: {audio_samples.shape}")
+            return ({"samples": combined},)
         
         elif output_format == "tuple":
             # Simple tuple format - for nodes that accept tuple input

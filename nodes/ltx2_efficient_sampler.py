@@ -4,50 +4,54 @@ import comfy.sample
 import nodes
 from .interpolation import interpolate
 from .gpu_monitor import get_gpu_monitor, PYNVML_AVAILABLE
+from .optimization_engines import get_engine, get_engine_names, EngineConfig
 
 # Optimization Presets for different GPU tiers
+# NOTE: frame_stride=1 is required for quality output. LTX models use temporal attention
+# across all frames - skipping frames breaks coherence. Efficiency comes from freeze_ratio
+# (freezes spatial attention after X% of steps) and throttle_delay (cooling pauses).
 OPTIMIZATION_PRESETS = {
-    "Performance (RTX 3080+)": {
-        "freeze_ratio": 0.7,
-        "throttle_delay": 0,
-        "frame_stride": 2,
-        "auto_thermal": False,
-        "description": "Minimal throttling for high-end GPUs"
-    },
-    "Balanced (RTX 3060/3070)": {
+    "Quality - Fast (RTX 3080+)": {
         "freeze_ratio": 0.5,
-        "throttle_delay": 25,
-        "frame_stride": 4,
+        "throttle_delay": 0,
+        "frame_stride": 1,
         "auto_thermal": False,
-        "description": "Good balance of speed and temperature"
+        "description": "Full quality, minimal throttling for high-end GPUs"
     },
-    "Aggressive (RTX 2060/2070)": {
+    "Quality - Balanced (RTX 3060/3070)": {
+        "freeze_ratio": 0.4,
+        "throttle_delay": 25,
+        "frame_stride": 1,
+        "auto_thermal": False,
+        "description": "Full quality with moderate thermal management"
+    },
+    "Quality - RTX 2060 6GB": {
         "freeze_ratio": 0.3,
         "throttle_delay": 50,
-        "frame_stride": 4,
+        "frame_stride": 1,
         "auto_thermal": False,
-        "description": "Current optimization - good for 6GB cards"
+        "description": "Full quality, good thermal management for 6GB cards"
     },
-    "Ultra Low Power (GTX 1660/Laptop)": {
-        "freeze_ratio": 0.15,
+    "Quality - Cool (RTX 2060 6GB)": {
+        "freeze_ratio": 0.25,
         "throttle_delay": 100,
-        "frame_stride": 6,
+        "frame_stride": 1,
         "auto_thermal": False,
-        "description": "Maximum throttling for older/mobile GPUs"
+        "description": "Full quality with aggressive cooling pauses (~70°C target)"
     },
-    "Extreme Cool (RTX 2060 6GB)": {
-        "freeze_ratio": 0.1,
+    "Quality - Ultra Cool (Low Power GPUs)": {
+        "freeze_ratio": 0.2,
         "throttle_delay": 150,
-        "frame_stride": 8,
+        "frame_stride": 1,
         "auto_thermal": False,
-        "description": "Target 65°C - very aggressive throttling"
+        "description": "Full quality, maximum thermal throttling for older/laptop GPUs"
     },
     "Thermal Auto-Scale": {
         "freeze_ratio": 0.3,
         "throttle_delay": None,  # Dynamic based on temperature
-        "frame_stride": 4,
+        "frame_stride": 1,
         "auto_thermal": True,
-        "description": "Reads GPU temp and auto-adjusts throttling"
+        "description": "Full quality, auto-adjusts throttling based on GPU temperature"
     },
     "Custom": {
         "freeze_ratio": None,
@@ -80,6 +84,10 @@ class LTX2EfficientSampler:
                 "freeze_ratio": ("FLOAT", {"default": 0.3, "min": 0.0, "max": 1.0, "step": 0.05}),
                 "thermal_throttle": ("BOOLEAN", {"default": True}),
                 "interpolation_method": (["linear", "slerp", "motion"], {"default": "slerp"}),
+                # Optimization Engine settings
+                "optimization_engine": (get_engine_names(), {"default": "Adaptive Cache (2-4x speedup)", "tooltip": "Temporal attention optimization engine"}),
+                "engine_cache_ratio": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.1, "tooltip": "Fraction of later steps to cache (AdaCache)"}),
+                "engine_merge_ratio": ("FLOAT", {"default": 0.25, "min": 0.0, "max": 0.5, "step": 0.05, "tooltip": "Fraction of tokens to merge (TokenMerge)"}),
             }
         }
 
@@ -88,7 +96,7 @@ class LTX2EfficientSampler:
     CATEGORY = "video/ltx2"
     
     @classmethod
-    def IS_CHANGED(cls, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method):
+    def IS_CHANGED(cls, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method, optimization_engine, engine_cache_ratio, engine_merge_ratio):
         """
         ComfyUI caching mechanism.
         Returns a unique value when output would change.
@@ -119,17 +127,34 @@ class LTX2EfficientSampler:
             str(attention_window),
             str(freeze_ratio),
             str(interpolation_method),
+            # Engine settings (affect attention computation)
+            str(optimization_engine),
+            str(engine_cache_ratio),
+            str(engine_merge_ratio),
             # Excluded: target_temp, thermal_throttle (only affect speed, not output)
         ]
         
         fingerprint = "_".join(fingerprint_parts)
         return hashlib.md5(fingerprint.encode()).hexdigest()
 
-    def sample(self, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method):
+    def sample(self, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method, optimization_engine, engine_cache_ratio, engine_merge_ratio):
         import time
         
         # NOTE: For combined audio-video latents from LTXVConcatAVLatent, use LTX2SeparateAVLatent
         # node first to extract video-only latent, then recombine with LTX2CombineAVLatent after.
+        
+        # Initialize optimization engine
+        engine = None
+        if optimization_engine != "None":
+            engine_config = EngineConfig(
+                cache_ratio=engine_cache_ratio,
+                merge_ratio=engine_merge_ratio,
+                verbose=False,
+            )
+            engine = get_engine(optimization_engine, engine_config)
+            if engine:
+                engine.setup(model, steps)
+                print(f"[LTX2Efficient] Using optimization engine: {engine.name}")
         
         # Apply Optimization Preset (override manual settings unless "Custom")
         preset = OPTIMIZATION_PRESETS.get(optimization_preset, {})
@@ -237,6 +262,29 @@ class LTX2EfficientSampler:
         shape = samples.shape
         ndims = len(shape)
         
+        # Check resolution compatibility (LTX requires /32 in pixel space -> /4 in latent space)
+        # Latent shape (usually): (..., H, W)
+        try:
+            h = shape[-2]
+            w = shape[-1]
+            # VAE usually typically 8x downsample. 
+            # LTX patch size is likely 2x2 or 4x4 in latent space.
+            # If latent divisible by 1 (all ints), that's trivial.
+            # But DiT models work on patches.
+            # 768x432 (pixel) -> 96x54 (latent).
+            # If patch size 2: 54/2=27. OK.
+            # If patch size 4: 54/4=13.5. BAD.
+            
+            if h % 2 != 0 or w % 2 != 0:
+                print(f"[LTX2Efficient] ⚠️ WARNING: Latent dimensions ({w}x{h}) are odd! Video will likely be noisy.")
+            elif h % 4 != 0 or w % 4 != 0:
+                 print(f"[LTX2Efficient] ⚠️ CRITICAL WARNING: Latent dimensions ({w}x{h}) not divisible by 4!")
+                 print(f"[LTX2Efficient] This corresponds to pixel resolution not divisible by 32 (e.g. 432px height).")
+                 print(f"[LTX2Efficient] LTX generally requires resolutions divisible by 32 (e.g. 448, 416, 768).")
+                 print(f"[LTX2Efficient] Your current height 432 is likely causing the noise. Try 448 or 416.")
+        except:
+            pass
+        
         # Track if we should skip striding (for unconvertible NestedTensors)
         skip_striding = is_nested and not converted
         
@@ -317,6 +365,10 @@ class LTX2EfficientSampler:
             def step_callback(step, x0, x, total_steps):
                 t = step / total_steps
                 
+                # Optimization engine step hook
+                if engine:
+                    engine.step_start(step, x)
+                
                 # THERMAL THROTTLE (DYNAMIC or FIXED)
                 if use_auto_thermal and gpu_monitor is not None:
                     # Dynamic: Read current temp and calculate delay
@@ -353,6 +405,10 @@ class LTX2EfficientSampler:
                         torch.cuda.empty_cache()
                 else:
                     patcher.unfreeze_spatial()
+                
+                # Engine step end hook
+                if engine:
+                    engine.step_end(step, x)
             
             # 3. Run Sampler
             # nodes.common_ksampler doesn't support callback, so we use comfy.sample.sample directly
@@ -391,6 +447,9 @@ class LTX2EfficientSampler:
             
         finally:
             patcher.restore()
+            # Cleanup optimization engine
+            if engine:
+                engine.cleanup()
 
         # 4. Interpolate
         result_samples = result["samples"]

@@ -22,7 +22,26 @@ class LTX2TemporalVAEDecode:
 
     def decode(self, samples, vae, tile_size, overlap, temporal_tiling, spatial_tiling):
         latents = samples["samples"]
-        # latents shape: (Frames, Channels, Height, Width)
+        # LTX2EfficientSampler may return 5D: (Batch, Channels, Frames, Height, Width)
+        # We need 4D for iteration: (Frames, Channels, Height, Width)
+        
+        # Check for AVLatentWrapper
+        if hasattr(latents, 'unbind') and not isinstance(latents, torch.Tensor):
+            # Try to extract video part if it's our wrapper
+            try:
+                # Assuming first element is video
+                latents = latents.unbind()[0]
+                print(f"[LTX2Decode] Unwrapped AVLatentWrapper -> {latents.shape}")
+            except:
+                print(f"[LTX2Decode] Warning: Could not unwrapp AVLatentWrapper")
+
+        shape = latents.shape
+        if len(shape) == 5:
+            # (B, C, F, H, W) -> (F, C, H, W) (Assuming Batch=1)
+            # Permute to (B, F, C, H, W) then reshape/squeeze
+            latents = latents.permute(0, 2, 1, 3, 4) # (B, F, C, H, W)
+            latents = latents.reshape(-1, shape[1], shape[3], shape[4]) # (B*F, C, H, W)
+            print(f"[LTX2Decode] Converted 5D {shape} -> 4D {latents.shape}")
         
         frames_count = latents.shape[0]
         
