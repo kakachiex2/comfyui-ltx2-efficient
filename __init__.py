@@ -7,6 +7,7 @@ from .nodes.ltx2_latent_utils import (
 )
 from .nodes.ltx2_experimental_sampler import LTX2ExperimentalKeyframeSampler
 from .nodes.ltx2_conditioning import LTX2ConditioningHelper
+from .nodes.ltx2_model_patcher import LTX2ModelPatcherNode
 
 NODE_CLASS_MAPPINGS = {
     "LTX2EfficientSampler": LTX2EfficientSampler,
@@ -16,6 +17,7 @@ NODE_CLASS_MAPPINGS = {
     "LTX2EmptyAudioLatent": LTX2EmptyAudioLatent,
     "LTX2ExperimentalKeyframeSampler": LTX2ExperimentalKeyframeSampler,
     "LTX2ConditioningHelper": LTX2ConditioningHelper,
+    "LTX2ModelPatcher": LTX2ModelPatcherNode,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -26,4 +28,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LTX2EmptyAudioLatent": "LTX2 Empty Audio Latent",
     "LTX2ExperimentalKeyframeSampler": "LTX2 Experimental Keyframe Sampler ⚠️",
     "LTX2ConditioningHelper": "LTX2 Conditioning Helper",
+    "LTX2ModelPatcher": "LTX2 Model Patcher",
 }

@@ -75,7 +75,8 @@ class LTX2EfficientSampler:
                 "steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
                 "cfg": ("FLOAT", {"default": 4.0, "min": 0.0, "max": 100.0}),
                 "sampler_name": (comfy.samplers.KSampler.SAMPLERS, ),
-                "scheduler": (comfy.samplers.KSampler.SCHEDULERS, ),
+                # FlowMatch schedulers recommended for LTX
+                "scheduler": (comfy.samplers.KSampler.SCHEDULERS, {"default": "simple", "tooltip": "Use 'simple' or 'sgm_uniform' for LTX (FlowMatch)"}),
                 "denoise": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
                 "optimization_preset": (list(OPTIMIZATION_PRESETS.keys()), {"default": "Thermal Auto-Scale"}),
                 "target_temp": ("INT", {"default": 70, "min": 50, "max": 85, "step": 1}),
@@ -88,6 +89,8 @@ class LTX2EfficientSampler:
                 "optimization_engine": (get_engine_names(), {"default": "Adaptive Cache (2-4x speedup)", "tooltip": "Temporal attention optimization engine"}),
                 "engine_cache_ratio": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.1, "tooltip": "Fraction of later steps to cache (AdaCache)"}),
                 "engine_merge_ratio": ("FLOAT", {"default": 0.25, "min": 0.0, "max": 0.5, "step": 0.05, "tooltip": "Fraction of tokens to merge (TokenMerge)"}),
+                # Context handling for Dual CLIP
+                "context_slice_method": (["Keep First 4096 (T5)", "Keep Last 4096 (Gemma)", "Auto-detect"], {"default": "Keep First 4096 (T5)", "tooltip": "How to slice 7680-dim context from dual CLIP"}),
             }
         }
 
@@ -96,7 +99,7 @@ class LTX2EfficientSampler:
     CATEGORY = "video/ltx2"
     
     @classmethod
-    def IS_CHANGED(cls, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method, optimization_engine, engine_cache_ratio, engine_merge_ratio):
+    def IS_CHANGED(cls, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method, optimization_engine, engine_cache_ratio, engine_merge_ratio, context_slice_method="Keep First 4096 (T5)"):
         """
         ComfyUI caching mechanism.
         Returns a unique value when output would change.
@@ -131,14 +134,33 @@ class LTX2EfficientSampler:
             str(optimization_engine),
             str(engine_cache_ratio),
             str(engine_merge_ratio),
+            # Context slicing affects output
+            str(context_slice_method),
             # Excluded: target_temp, thermal_throttle (only affect speed, not output)
         ]
         
         fingerprint = "_".join(fingerprint_parts)
         return hashlib.md5(fingerprint.encode()).hexdigest()
 
-    def sample(self, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method, optimization_engine, engine_cache_ratio, engine_merge_ratio):
+    def sample(self, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method, optimization_engine, engine_cache_ratio, engine_merge_ratio, context_slice_method="Keep First 4096 (T5)"):
         import time
+        
+        # SCHEDULER VALIDATION: LTX is FlowMatch, not Diffusion
+        incompatible_schedulers = ["normal", "karras", "exponential", "ddim_uniform", "beta"]
+        if scheduler in incompatible_schedulers:
+            print(f"")
+            print(f"[LTX2Efficient] " + "="*60)
+            print(f"[LTX2Efficient] ⚠️  SCHEDULER WARNING: '{scheduler}' IS INCOMPATIBLE!")
+            print(f"[LTX2Efficient] " + "="*60)
+            print(f"[LTX2Efficient] LTX Video uses FlowMatch, not Diffusion.")
+            print(f"[LTX2Efficient] Using '{scheduler}' will produce PURE NOISE.")
+            print(f"[LTX2Efficient] ")
+            print(f"[LTX2Efficient] ✓ Recommended schedulers: 'simple', 'sgm_uniform'")
+            print(f"[LTX2Efficient] " + "="*60)
+            print(f"")
+        
+        # Store context slice method for patcher
+        self._context_slice_method = context_slice_method
         
         # NOTE: For combined audio-video latents from LTXVConcatAVLatent, use LTX2SeparateAVLatent
         # node first to extract video-only latent, then recombine with LTX2CombineAVLatent after.
@@ -427,6 +449,8 @@ class LTX2EfficientSampler:
             
             # Run sampling
             # comfy.sample.sample also expects the latent Tensor as 'latent_image'
+            # NOTE: Scheduler validation is done at the start of sample()
+
             result_tensor = comfy.sample.sample(
                 model, noise, steps, cfg, sampler_name, scheduler, 
                 positive, negative, kf_samples, 
@@ -586,7 +610,6 @@ class LTX2Patcher:
         def patched_forward(*args, **kwargs):
             # Check if attention_mask is missing from kwargs
             if "attention_mask" not in kwargs:
-                # print("[LTX2Patcher] Injecting missing attention_mask=None")
                 kwargs["attention_mask"] = None
             
             # Check for context dimension mismatch (common with Dual Text Encoders/GGUF)
@@ -595,16 +618,38 @@ class LTX2Patcher:
             if "context" in kwargs:
                 context = kwargs["context"]
                 if hasattr(context, "shape") and len(context.shape) >= 3:
-                     dim = context.shape[-1]
-                     if dim == 7680:
-                         print(f"[LTX2Patcher] ⚠️ Detected context with dimension {dim}. LTX model expects 4096.")
-                         print(f"[LTX2Patcher] -> Slicing global T5 embedding (last 4096 channels)...")
-                         # Assuming T5 (4096) is the standard and often last in stack (e.g. if concatenated)
-                         # 7680 = 3584 (Gemma/Other) + 4096 (T5).
-                         kwargs["context"] = context[..., -4096:]
-                     elif dim > 4096 and dim != 4096:
-                         # Fallback warning for other mis-matches
-                         print(f"[LTX2Patcher] ⚠️ Warning: Context dimension {dim} > 4096. Model might crash if it expects only T5 (4096).")
+                    dim = context.shape[-1]
+                    if dim == 7680:
+                        # Get slice method from sampler instance if available
+                        slice_method = getattr(self, '_context_slice_method', 'Keep First 4096 (T5)')
+                        
+                        if slice_method == "Keep Last 4096 (Gemma)":
+                            kwargs["context"] = context[..., -4096:]
+                            if not getattr(self, '_context_logged', False):
+                                print(f"[LTX2Patcher] Sliced context 7680->4096 (Last 4096 / Gemma)")
+                                self._context_logged = True
+                        elif slice_method == "Auto-detect":
+                            # Auto-detect: T5 typically has different variance
+                            first_var = context[..., :4096].var().item()
+                            last_var = context[..., -4096:].var().item()
+                            if first_var < last_var:
+                                kwargs["context"] = context[..., :4096]
+                                if not getattr(self, '_context_logged', False):
+                                    print(f"[LTX2Patcher] Auto-detected T5 in first 4096 (var={first_var:.4f} < {last_var:.4f})")
+                                    self._context_logged = True
+                            else:
+                                kwargs["context"] = context[..., -4096:]
+                                if not getattr(self, '_context_logged', False):
+                                    print(f"[LTX2Patcher] Auto-detected T5 in last 4096 (var={last_var:.4f} < {first_var:.4f})")
+                                    self._context_logged = True
+                        else:
+                            # Default: Keep First 4096 (T5)
+                            kwargs["context"] = context[..., :4096]
+                            if not getattr(self, '_context_logged', False):
+                                print(f"[LTX2Patcher] Sliced context 7680->4096 (First 4096 / T5)")
+                                self._context_logged = True
+                    elif dim > 4096 and dim != 4096:
+                        print(f"[LTX2Patcher] ⚠️ Warning: Context dimension {dim} > 4096. Model might crash if it expects only T5 (4096).")
             
             return original_forward(*args, **kwargs)
             

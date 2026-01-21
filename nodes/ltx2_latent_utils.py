@@ -8,28 +8,91 @@ import torch
 
 class AVLatentWrapper:
     """
-    A wrapper class that mimics NestedTensor's unbind() method.
+    A wrapper class that mimics NestedTensor's API for audio-video latent compatibility.
     
-    This allows LTX2CombineAVLatent output to be compatible with
-    LTXVSeparateAVLatent which expects .unbind() to return [video, audio] tensors.
+    This allows LTX2CombineAVLatent output to be compatible with:
+    - LTXVSeparateAVLatent (expects .unbind() to return [video, audio])
+    - LTXVDecodeAV (expects NestedTensor-like behavior)
+    - Other LTX nodes that check for NestedTensor
+    
+    Methods implemented:
+    - unbind(): Returns [video, audio] tensors
+    - values(): Returns video tensor (primary content)
+    - to_padded_tensor(padding): Returns video tensor (for compatibility)
+    - clone(): Creates a copy
+    - contiguous(): Returns self (tensors are already contiguous)
+    - is_contiguous(): Returns True
+    
+    Properties:
+    - shape: Returns video tensor shape
+    - device: Returns video tensor device
+    - dtype: Returns video tensor dtype
+    - ndim: Returns video tensor ndim
     """
     
     def __init__(self, video_tensor, audio_tensor):
         self.video = video_tensor
         self.audio = audio_tensor
         # Store shape info for compatibility checks
-        self._shape = video_tensor.shape  # Report video shape
+        self._shape = video_tensor.shape
     
     def unbind(self):
         """Return video and audio tensors like NestedTensor.unbind()"""
         return [self.video, self.audio]
     
+    def values(self):
+        """Return the primary tensor (video) for NestedTensor compatibility"""
+        return self.video
+    
+    def to_padded_tensor(self, padding=0.0):
+        """Return video tensor for NestedTensor compatibility"""
+        return self.video
+    
+    def clone(self):
+        """Create a copy of this wrapper"""
+        return AVLatentWrapper(self.video.clone(), self.audio.clone())
+    
+    def contiguous(self):
+        """Return self with contiguous tensors"""
+        return AVLatentWrapper(self.video.contiguous(), self.audio.contiguous())
+    
+    def is_contiguous(self):
+        """Check if underlying tensors are contiguous"""
+        return self.video.is_contiguous() and self.audio.is_contiguous()
+    
+    def to(self, *args, **kwargs):
+        """Move tensors to device/dtype"""
+        return AVLatentWrapper(
+            self.video.to(*args, **kwargs),
+            self.audio.to(*args, **kwargs)
+        )
+    
+    def detach(self):
+        """Detach tensors from computation graph"""
+        return AVLatentWrapper(self.video.detach(), self.audio.detach())
+    
     @property
     def shape(self):
         return self._shape
     
+    @property
+    def device(self):
+        return self.video.device
+    
+    @property
+    def dtype(self):
+        return self.video.dtype
+    
+    @property
+    def ndim(self):
+        return self.video.ndim
+    
     def __repr__(self):
         return f"AVLatentWrapper(video={self.video.shape}, audio={self.audio.shape})"
+    
+    def __len__(self):
+        """Return 2 (video and audio)"""
+        return 2
 
 class LTX2SeparateAVLatent:
     """
