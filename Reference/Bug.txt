@@ -1,0 +1,686 @@
+
+# ComfyUI Error Report
+## Error Details
+- **Node ID:** 92:205
+- **Node Type:** LTX2EfficientSampler
+- **Exception Type:** RuntimeError
+- **Exception Message:** The expanded size of the tensor (336) must match the existing size (2) at non-singleton dimension 2.  Target sizes: [2, 32, 336, 1024].  Tensor sizes: [1, 1, 2, 1024]
+
+## Stack Trace
+```
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\execution.py", line 518, in execute
+    output_data, output_ui, has_subgraph, has_pending_tasks = await get_output_data(prompt_id, unique_id, obj, input_data_all, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\execution.py", line 329, in get_output_data
+    return_values = await _async_map_node_over_list(prompt_id, unique_id, obj, input_data_all, obj.FUNCTION, allow_interrupt=True, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\execution.py", line 303, in _async_map_node_over_list
+    await process_inputs(input_dict, i)
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\execution.py", line 291, in process_inputs
+    result = f(**inputs)
+             ^^^^^^^^^^^
+
+  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-ltx2-efficient\nodes\ltx2_efficient_sampler.py", line 430, in sample
+    result_tensor = comfy.sample.sample(
+                    ^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\sample.py", line 60, in sample
+    samples = sampler.sample(noise, positive, negative, cfg=cfg, latent_image=latent_image, start_step=start_step, last_step=last_step, force_full_denoise=force_full_denoise, denoise_mask=noise_mask, sigmas=sigmas, callback=callback, disable_pbar=disable_pbar, seed=seed)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 1178, in sample
+    return sample(self.model, noise, positive, negative, cfg, self.device, sampler, sigmas, self.model_options, latent_image=latent_image, denoise_mask=denoise_mask, callback=callback, disable_pbar=disable_pbar, seed=seed)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 1068, in sample
+    return cfg_guider.sample(noise, latent_image, sampler, sigmas, denoise_mask, callback, disable_pbar, seed)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 1050, in sample
+    output = executor.execute(noise, latent_image, sampler, sigmas, denoise_mask, callback, disable_pbar, seed, latent_shapes=latent_shapes)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\patcher_extension.py", line 112, in execute
+    return self.original(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 994, in outer_sample
+    output = self.inner_sample(noise, latent_image, device, sampler, sigmas, denoise_mask, callback, disable_pbar, seed, latent_shapes=latent_shapes)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 980, in inner_sample
+    samples = executor.execute(self, sigmas, extra_args, callback, noise, latent_image, denoise_mask, disable_pbar)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\patcher_extension.py", line 112, in execute
+    return self.original(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 752, in sample
+    samples = self.sampler_function(model_k, noise, sigmas, extra_args=extra_args, callback=k_callback, disable=disable_pbar, **self.extra_options)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\utils\_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\k_diffusion\sampling.py", line 202, in sample_euler
+    denoised = model(x, sigma_hat * s_in, **extra_args)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 401, in __call__
+    out = self.inner_model(x, sigma, model_options=model_options, seed=seed)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 953, in __call__
+    return self.outer_predict_noise(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 960, in outer_predict_noise
+    ).execute(x, timestep, model_options, seed)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\patcher_extension.py", line 112, in execute
+    return self.original(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 963, in predict_noise
+    return sampling_function(self.inner_model, x, timestep, self.conds.get("negative", None), self.conds.get("positive", None), self.cfg, model_options=model_options, seed=seed)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 381, in sampling_function
+    out = calc_cond_batch(model, conds, x, timestep, model_options)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 206, in calc_cond_batch
+    return _calc_cond_batch_outer(model, conds, x_in, timestep, model_options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 214, in _calc_cond_batch_outer
+    return executor.execute(model, conds, x_in, timestep, model_options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\patcher_extension.py", line 112, in execute
+    return self.original(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 326, in _calc_cond_batch
+    output = model.apply_model(input_x, timestep_, **c).chunk(batch_chunks)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\model_base.py", line 163, in apply_model
+    return comfy.patcher_extension.WrapperExecutor.new_class_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\patcher_extension.py", line 112, in execute
+    return self.original(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\model_base.py", line 205, in _apply_model
+    model_output = self.diffusion_model(xc, t, context=context, control=control, transformer_options=transformer_options, **extra_conds)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-ltx2-efficient\nodes\ltx2_efficient_sampler.py", line 604, in patched_forward
+    return original_forward(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 745, in forward
+    return comfy.patcher_extension.WrapperExecutor.new_class_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\patcher_extension.py", line 112, in execute
+    return self.original(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 792, in _forward
+    x = self._process_transformer_blocks(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 915, in _process_transformer_blocks
+    x = block(
+        ^^^^^^
+
+  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 427, in forward
+    x += self.attn2(x, context=context, mask=attention_mask, transformer_options=transformer_options)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-ltx2-efficient\nodes\ltx2_efficient_sampler.py", line 649, in new_forward
+    return original_forward(x, context, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 382, in forward
+    out = comfy.ldm.modules.attention.optimized_attention_masked(q, k, v, self.heads, mask, attn_precision=self.attn_precision, transformer_options=transformer_options)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\modules\attention.py", line 137, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\modules\attention.py", line 503, in attention_pytorch
+    out = comfy.ops.scaled_dot_product_attention(q, k, v, attn_mask=mask, dropout_p=0.0, is_causal=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ops.py", line 52, in scaled_dot_product_attention
+    return torch.nn.functional.scaled_dot_product_attention(q, k, v, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+```
+## System Information
+- **ComfyUI Version:** 0.8.2
+- **Arguments:** C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\main.py --user-directory C:\Users\rafae\Documents\ComfyUI\user --input-directory C:\Users\rafae\Documents\ComfyUI\input --output-directory C:\Users\rafae\Documents\ComfyUI\output --front-end-root C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\web_custom_versions\desktop_app --base-directory C:\Users\rafae\Documents\ComfyUI --extra-model-paths-config C:\Users\rafae\AppData\Roaming\ComfyUI\extra_models_config.yaml --log-stdout --listen 127.0.0.1 --port 8000 --enable-manager
+- **OS:** win32
+- **Python Version:** 3.12.9 (main, Feb 12 2025, 14:52:31) [MSC v.1942 64 bit (AMD64)]
+- **Embedded Python:** false
+- **PyTorch Version:** 2.9.1+cu130
+## Devices
+
+- **Name:** cuda:0 NVIDIA GeForce RTX 2060 : cudaMallocAsync
+  - **Type:** cuda
+  - **VRAM Total:** 6441992192
+  - **VRAM Free:** 5351931904
+  - **Torch VRAM Total:** 0
+  - **Torch VRAM Free:** 0
+
+## Logs
+```
+2026-01-20T23:40:26.291481 - Using async weight offloading with 2 streams
+2026-01-20T23:40:26.292493 - Enabled pinned memory 29468.0
+2026-01-20T23:40:26.298134 - working around nvidia conv3d memory bug.
+2026-01-20T23:40:28.065679 - Found comfy_kitchen backend eager: {'available': True, 'disabled': False, 'unavailable_reason': None, 'capabilities': ['apply_rope', 'apply_rope1', 'dequantize_nvfp4', 'dequantize_per_tensor_fp8', 'quantize_nvfp4', 'quantize_per_tensor_fp8', 'scaled_mm_nvfp4']}
+2026-01-20T23:40:28.065679 - Found comfy_kitchen backend cuda: {'available': True, 'disabled': False, 'unavailable_reason': None, 'capabilities': ['apply_rope', 'apply_rope1', 'dequantize_nvfp4', 'dequantize_per_tensor_fp8', 'quantize_nvfp4', 'quantize_per_tensor_fp8', 'scaled_mm_nvfp4']}
+2026-01-20T23:40:28.065679 - Found comfy_kitchen backend triton: {'available': False, 'disabled': True, 'unavailable_reason': "ImportError: No module named 'triton'", 'capabilities': []}
+2026-01-20T23:40:28.529183 - Using pytorch attention
+2026-01-20T23:40:31.866473 - Python version: 3.12.9 (main, Feb 12 2025, 14:52:31) [MSC v.1942 64 bit (AMD64)]
+2026-01-20T23:40:31.866473 - ComfyUI version: 0.8.2
+2026-01-20T23:40:31.927339 - [Prompt Server] web root: C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\web_custom_versions\desktop_app
+2026-01-20T23:40:31.927339 - [START] ComfyUI-Manager
+2026-01-20T23:40:32.404996 - [ComfyUI-Manager] network_mode: public
+2026-01-20T23:40:32.449313 - [ComfyUI-Manager] The matrix sharing feature has been disabled because the `matrix-nio` dependency is not installed.
+	To use this feature, please run the following command:
+	C:\Users\rafae\Documents\ComfyUI\.venv\Scripts\python.exe -m pip install matrix-nio
+
+2026-01-20T23:40:33.595794 - Total VRAM 6144 MB, total RAM 65485 MB
+2026-01-20T23:40:33.595794 - pytorch version: 2.9.1+cu130
+2026-01-20T23:40:33.596871 - Set vram state to: NORMAL_VRAM
+2026-01-20T23:40:33.596871 - Device: cuda:0 NVIDIA GeForce RTX 2060 : cudaMallocAsync
+2026-01-20T23:40:33.636323 - Using async weight offloading with 2 streams
+2026-01-20T23:40:33.637829 - Enabled pinned memory 29468.0
+2026-01-20T23:40:35.439440 - 
+
+2026-01-20T23:40:35.439440 - 
+2026-01-20T23:40:35.439440 -          🔶[38;5;229mChaosaiart: visit our Discord. https://chaosaiart.com/discord[0m2026-01-20T23:40:35.439440 - 
+2026-01-20T23:40:35.439440 - 
+
+2026-01-20T23:40:35.439440 - 
+2026-01-20T23:40:35.782384 - [36;20m[C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfy-mtb] | INFO -> loaded [96m103[0m nodes successfuly[0m
+2026-01-20T23:40:35.784518 - [36;20m[C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfy-mtb] | INFO -> Some nodes (5) could not be loaded. This can be ignored, but go to http://127.0.0.1:8000/mtb if you want more information.[0m
+2026-01-20T23:40:35.870092 - [36;20m[custom_nodes.comfyui_controlnet_aux] | INFO -> Using ckpts path: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_controlnet_aux\ckpts[0m
+2026-01-20T23:40:35.871153 - [36;20m[custom_nodes.comfyui_controlnet_aux] | INFO -> Using symlinks: False[0m
+2026-01-20T23:40:35.871153 - [36;20m[custom_nodes.comfyui_controlnet_aux] | INFO -> Using ort providers: ['CUDAExecutionProvider', 'DirectMLExecutionProvider', 'OpenVINOExecutionProvider', 'ROCMExecutionProvider', 'CPUExecutionProvider', 'CoreMLExecutionProvider'][0m
+2026-01-20T23:40:36.401963 - C:\Users/rafae/Documents/ComfyUI\custom_nodes\comfyui_controlnet_aux\node_wrappers\dwpose.py:26: UserWarning: DWPose: Onnxruntime not found or doesn't come with acceleration providers, switch to OpenCV with CPU device. DWPose might run very slowly
+  warnings.warn("DWPose: Onnxruntime not found or doesn't come with acceleration providers, switch to OpenCV with CPU device. DWPose might run very slowly")
+2026-01-20T23:40:36.431205 - Traceback (most recent call last):
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\nodes.py", line 2155, in load_custom_node
+    module_spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 999, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-anyline\__init__.py", line 1, in <module>
+    from .anyline import AnyLine
+  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-anyline\anyline.py", line 9, in <module>
+    from custom_nodes.comfyui_controlnet_aux.src.controlnet_aux.teed import TEDDetector
+ModuleNotFoundError: No module named 'custom_nodes.comfyui_controlnet_aux.src.controlnet_aux'
+
+2026-01-20T23:40:36.432264 - Cannot import C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-anyline module for custom nodes: No module named 'custom_nodes.comfyui_controlnet_aux.src.controlnet_aux'
+2026-01-20T23:40:37.007276 - C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\timm\models\layers\__init__.py:49: FutureWarning: Importing from timm.models.layers is deprecated, please import via timm.layers
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.layers", FutureWarning)
+2026-01-20T23:40:37.008783 - C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\timm\models\registry.py:4: FutureWarning: Importing from timm.models.registry is deprecated, please import via timm.models
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.models", FutureWarning)
+2026-01-20T23:40:42.663464 - ### Loading: ControlnetAux (V0.3 beta)2026-01-20T23:40:42.664479 - 
+2026-01-20T23:40:42.927980 - Traceback (most recent call last):
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\nodes.py", line 2155, in load_custom_node
+    module_spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 999, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-controlnetaux\__init__.py", line 13, in <module>
+    from .nodes.nodes import NODE_CLASS_MAPPINGS as controlnetaux_NODE_CLASS_MAPPINGS,  NODE_DISPLAY_NAME_MAPPINGS as controlnetaux_NODE_DISPLAY_NAME_MAPPINGS
+  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-controlnetaux\nodes\nodes.py", line 4, in <module>
+    from controlnet_aux import (
+  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\controlnet_aux\__init__.py", line 15, in <module>
+    from .mediapipe_face import MediapipeFaceDetector
+  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\controlnet_aux\mediapipe_face\__init__.py", line 9, in <module>
+    from .mediapipe_face_common import generate_annotation
+  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\controlnet_aux\mediapipe_face\mediapipe_face_common.py", line 16, in <module>
+    mp_drawing = mp.solutions.drawing_utils
+                 ^^^^^^^^^^^^
+AttributeError: module 'mediapipe' has no attribute 'solutions'
+
+2026-01-20T23:40:42.927980 - Cannot import C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-controlnetaux module for custom nodes: module 'mediapipe' has no attribute 'solutions'
+2026-01-20T23:40:45.291195 - ✅ 预设API路由注册完成2026-01-20T23:40:45.291195 - 
+2026-01-20T23:40:45.389082 - [34m[ComfyUI-Easy-Use] server: [0mv1.3.4 [92mLoaded[0m2026-01-20T23:40:45.389082 - 
+2026-01-20T23:40:45.389082 - [34m[ComfyUI-Easy-Use] web root: [0mC:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-easy-use\web_version/v2 [92mLoaded[0m2026-01-20T23:40:45.389082 - 
+2026-01-20T23:40:45.407222 - [VisualMarquee] API route registered: POST /flow_assistor/submit_crop2026-01-20T23:40:45.407222 - 
+2026-01-20T23:40:45.407222 - [VisualMarquee] API route registered: POST /api/flow_assistor/submit_crop2026-01-20T23:40:45.407222 - 
+2026-01-20T23:40:45.414484 - ComfyUI-GGUF: Allowing full torch compile
+2026-01-20T23:40:45.421537 - ### Loading: ComfyUI-Impact-Pack (V8.28.2)
+2026-01-20T23:40:45.606148 - [Impact Pack] Wildcard total size (0.00 MB) is within cache limit (50.00 MB). Using full cache mode.
+2026-01-20T23:40:45.608746 - [Impact Pack] Wildcards loading done.
+2026-01-20T23:40:45.611271 - ### Loading: ComfyUI-Inspire-Pack (V1.23)
+2026-01-20T23:40:47.959991 - --------------
+2026-01-20T23:40:47.959991 - [91m ### Mixlab Nodes: [93mLoaded
+2026-01-20T23:40:47.967962 - json_repair## OK2026-01-20T23:40:47.967962 - 
+2026-01-20T23:40:47.979217 - ChatGPT.available True
+2026-01-20T23:40:47.981262 - edit_mask.available True
+2026-01-20T23:40:48.240284 - ## clip_interrogator_model not found: C:\Users\rafae\Documents\ComfyUI\models\clip_interrogator\Salesforce\blip-image-captioning-base, pls download from https://huggingface.co/Salesforce/blip-image-captioning-base2026-01-20T23:40:48.240284 - 
+2026-01-20T23:40:48.241286 - ClipInterrogator.available True
+2026-01-20T23:40:48.341799 - ## text_generator_model not found: C:\Users\rafae\Documents\ComfyUI\models\prompt_generator\text2image-prompt-generator, pls download from https://huggingface.co/succinctly/text2image-prompt-generator/tree/main2026-01-20T23:40:48.341799 - 
+2026-01-20T23:40:48.341799 - ## zh_en_model not found: C:\Users\rafae\Documents\ComfyUI\models\prompt_generator\opus-mt-zh-en, pls download from https://huggingface.co/Helsinki-NLP/opus-mt-zh-en/tree/main2026-01-20T23:40:48.342824 - 
+2026-01-20T23:40:48.342824 - PromptGenerate.available True
+2026-01-20T23:40:48.342824 - ChinesePrompt.available True
+2026-01-20T23:40:48.342824 - RembgNode_.available True
+2026-01-20T23:40:48.639025 - TripoSR.available
+2026-01-20T23:40:48.640286 - MiniCPMNode.available
+2026-01-20T23:40:48.950272 - Scenedetect.available
+2026-01-20T23:40:48.980010 - FishSpeech.available
+2026-01-20T23:40:48.992988 - SenseVoice.available
+2026-01-20T23:40:49.039090 - Whisper.available False
+2026-01-20T23:40:49.040336 - fal-client## OK2026-01-20T23:40:49.040336 - 
+2026-01-20T23:40:49.058799 - FalVideo.available
+2026-01-20T23:40:49.058799 - [93m -------------- [0m
+2026-01-20T23:40:49.065528 - [MultiGPU Core Patching] Patching mm.soft_empty_cache for Comprehensive Memory Management (VRAM + CPU + Store Pruning)
+2026-01-20T23:40:49.069098 - [MultiGPU Core Patching] Patching mm.get_torch_device, mm.text_encoder_device, mm.unet_offload_device
+2026-01-20T23:40:49.069098 - [MultiGPU DEBUG] Initial current_device: cuda:0
+2026-01-20T23:40:49.070102 - [MultiGPU DEBUG] Initial current_text_encoder_device: cuda:0
+2026-01-20T23:40:49.070102 - [MultiGPU DEBUG] Initial current_unet_offload_device: cpu
+2026-01-20T23:40:49.078251 - [MultiGPU] Initiating custom_node Registration. . .
+2026-01-20T23:40:49.078251 - -----------------------------------------------
+2026-01-20T23:40:49.079291 - custom_node                   Found     Nodes
+2026-01-20T23:40:49.079291 - -----------------------------------------------
+2026-01-20T23:40:49.081333 - ComfyUI-LTXVideo                  N         0
+2026-01-20T23:40:49.081333 - ComfyUI-Florence2                 N         0
+2026-01-20T23:40:49.082346 - ComfyUI_bitsandbytes_NF4          N         0
+2026-01-20T23:40:49.082346 - x-flux-comfyui                    N         0
+2026-01-20T23:40:49.082346 - ComfyUI-MMAudio                   N         0
+2026-01-20T23:40:49.083852 - ComfyUI-GGUF                      Y        18
+2026-01-20T23:40:49.083852 - PuLID_ComfyUI                     N         0
+2026-01-20T23:40:49.084869 - ComfyUI-WanVideoWrapper           N         0
+2026-01-20T23:40:49.084869 - -----------------------------------------------
+2026-01-20T23:40:49.085869 - [MultiGPU] Registration complete. Final mappings: CheckpointLoaderAdvancedMultiGPU, CheckpointLoaderAdvancedDisTorch2MultiGPU, UNetLoaderLP, UNETLoaderMultiGPU, VAELoaderMultiGPU, CLIPLoaderMultiGPU, DualCLIPLoaderMultiGPU, TripleCLIPLoaderMultiGPU, QuadrupleCLIPLoaderMultiGPU, CLIPVisionLoaderMultiGPU, CheckpointLoaderSimpleMultiGPU, ControlNetLoaderMultiGPU, DiffusersLoaderMultiGPU, DiffControlNetLoaderMultiGPU, UNETLoaderDisTorch2MultiGPU, VAELoaderDisTorch2MultiGPU, CLIPLoaderDisTorch2MultiGPU, DualCLIPLoaderDisTorch2MultiGPU, TripleCLIPLoaderDisTorch2MultiGPU, QuadrupleCLIPLoaderDisTorch2MultiGPU, CLIPVisionLoaderDisTorch2MultiGPU, CheckpointLoaderSimpleDisTorch2MultiGPU, ControlNetLoaderDisTorch2MultiGPU, DiffusersLoaderDisTorch2MultiGPU, DiffControlNetLoaderDisTorch2MultiGPU, UnetLoaderGGUFDisTorchMultiGPU, UnetLoaderGGUFAdvancedDisTorchMultiGPU, CLIPLoaderGGUFDisTorchMultiGPU, DualCLIPLoaderGGUFDisTorchMultiGPU, TripleCLIPLoaderGGUFDisTorchMultiGPU, QuadrupleCLIPLoaderGGUFDisTorchMultiGPU, UnetLoaderGGUFDisTorch2MultiGPU, UnetLoaderGGUFAdvancedDisTorch2MultiGPU, CLIPLoaderGGUFDisTorch2MultiGPU, DualCLIPLoaderGGUFDisTorch2MultiGPU, TripleCLIPLoaderGGUFDisTorch2MultiGPU, QuadrupleCLIPLoaderGGUFDisTorch2MultiGPU, UnetLoaderGGUFMultiGPU, UnetLoaderGGUFAdvancedMultiGPU, CLIPLoaderGGUFMultiGPU, DualCLIPLoaderGGUFMultiGPU, TripleCLIPLoaderGGUFMultiGPU, QuadrupleCLIPLoaderGGUFMultiGPU
+2026-01-20T23:40:49.102826 - [PromptControl] ERROR: Your lark package reports an ancient version (0.12.0) and will not work. If you have the 'lark-parser' package in your Python environment, remove that and *reinstall* lark!
+C:\Users\rafae\Documents\ComfyUI\.venv\Scripts\python.exe -m pip uninstall lark-parser lark
+C:\Users\rafae\Documents\ComfyUI\.venv\Scripts\python.exe -m pip install lark
+2026-01-20T23:40:49.106011 - Traceback (most recent call last):
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\nodes.py", line 2155, in load_custom_node
+    module_spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 999, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-prompt-control\__init__.py", line 34, in <module>
+    mod = importlib.import_module(f".prompt_control.nodes_{node}", package=__name__)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Roaming\uv\python\cpython-3.12.9-windows-x86_64-none\Lib\importlib\__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 999, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-prompt-control\prompt_control\nodes_base.py", line 2, in <module>
+    from .prompts import encode_prompt
+  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-prompt-control\prompt_control\prompts.py", line 23, in <module>
+    from .parser import parse_cuts
+  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-prompt-control\prompt_control\parser.py", line 24, in <module>
+    raise ImportError(x)
+ImportError: Your lark package reports an ancient version (0.12.0) and will not work. If you have the 'lark-parser' package in your Python environment, remove that and *reinstall* lark!
+C:\Users\rafae\Documents\ComfyUI\.venv\Scripts\python.exe -m pip uninstall lark-parser lark
+C:\Users\rafae\Documents\ComfyUI\.venv\Scripts\python.exe -m pip install lark
+
+2026-01-20T23:40:49.106011 - Cannot import C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-prompt-control module for custom nodes: Your lark package reports an ancient version (0.12.0) and will not work. If you have the 'lark-parser' package in your Python environment, remove that and *reinstall* lark!
+C:\Users\rafae\Documents\ComfyUI\.venv\Scripts\python.exe -m pip uninstall lark-parser lark
+C:\Users\rafae\Documents\ComfyUI\.venv\Scripts\python.exe -m pip install lark
+2026-01-20T23:40:49.312146 - Error loading AILab_SAM3Segment.py: No module named 'triton'2026-01-20T23:40:49.312146 - 
+2026-01-20T23:40:49.315633 - [34m[ComfyUI-RMBG][0m v[93m2.9.6[0m | [93m32 nodes[0m [92mLoaded[0m2026-01-20T23:40:49.315633 - 
+2026-01-20T23:40:49.997646 - [36;20m[C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_controlnet_aux] | INFO -> Using ckpts path: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_controlnet_aux\ckpts[0m
+2026-01-20T23:40:49.998656 - [36;20m[C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_controlnet_aux] | INFO -> Using symlinks: False[0m
+2026-01-20T23:40:49.998656 - [36;20m[C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_controlnet_aux] | INFO -> Using ort providers: ['CUDAExecutionProvider', 'DirectMLExecutionProvider', 'OpenVINOExecutionProvider', 'ROCMExecutionProvider', 'CPUExecutionProvider', 'CoreMLExecutionProvider'][0m
+2026-01-20T23:40:52.693185 - ('Looking for cached Spacy xx_sent_ud_sm.',)
+2026-01-20T23:40:53.299115 - [1;35m
+### [START] ComfyUI AlekPet Nodes [1;34mv1.0.91[0m[1;35m ###[0m2026-01-20T23:40:53.300119 - 
+2026-01-20T23:40:53.300119 - [92mNode -> ArgosTranslateNode: [93mArgosTranslateCLIPTextEncodeNode, ArgosTranslateTextNode[0m [92m[92m[Loading][0m[0m2026-01-20T23:40:53.300119 - 
+2026-01-20T23:40:53.300119 - [92mNode -> ChatGLMNode: [93mChatGLM4TranslateCLIPTextEncodeNode, ChatGLM4TranslateTextNode, ChatGLM4InstructNode, ChatGLM4InstructMediaNode, CogViewImageGenerateNode, CogVideoXGenerateNode[0m [92m[92m[Loading][0m[0m2026-01-20T23:40:53.300119 - 
+2026-01-20T23:40:53.300119 - [92mNode -> DeepTranslatorNode: [93mDeepTranslatorCLIPTextEncodeNode, DeepTranslatorTextNode[0m [92m[92m[Loading][0m[0m2026-01-20T23:40:53.300119 - 
+2026-01-20T23:40:53.300119 - [92mNode -> ExtrasNode: [93mPreviewTextNode, HexToHueNode, ColorsCorrectNode[0m [92m[92m[Loading][0m[0m2026-01-20T23:40:53.300119 - 
+2026-01-20T23:40:53.300119 - [92mNode -> GoogleTranslateNode: [93mGoogleTranslateCLIPTextEncodeNode, GoogleTranslateTextNode[0m [92m[92m[Loading][0m[0m2026-01-20T23:40:53.300119 - 
+2026-01-20T23:40:53.300119 - [92mNode -> IDENode: [93mIDENode[0m [92m[92m[Loading][0m[0m2026-01-20T23:40:53.300119 - 
+2026-01-20T23:40:53.300119 - [92mNode -> PainterNode: [93mPainterNode[0m [92m[92m[Loading][0m[0m2026-01-20T23:40:53.300119 - 
+2026-01-20T23:40:53.300119 - [92mNode -> PoseNode: [93mPoseNode[0m [92m[92m[Loading][0m[0m2026-01-20T23:40:53.300119 - 
+2026-01-20T23:40:53.300119 - [1;35m### [END] ComfyUI AlekPet Nodes ###[0m2026-01-20T23:40:53.300119 - 
+2026-01-20T23:40:53.332919 - # 😺dzNodes: LayerStyle -> [1;33mCannot import name 'guidedFilter' from 'cv2.ximgproc'
+A few nodes cannot works properly, while most nodes are not affected. Please REINSTALL package 'opencv-contrib-python'.
+For detail refer to [4mhttps://github.com/chflame163/ComfyUI_LayerStyle/issues/5[0m[m2026-01-20T23:40:53.332919 - 
+2026-01-20T23:40:53.453885 - Failed to import BiRefNet modules: No module named 'src'
+2026-01-20T23:40:53.468621 - XIS_ReorderImages node registered
+2026-01-20T23:40:53.731089 - Registered XIS_ImageManager endpoints
+2026-01-20T23:40:53.731089 - [XISER] Successfully registered routes: /xiser_color, /xiser/cutout, /custom/list_psd_files, /xiser/fonts, XIS_ImageManager endpoints2026-01-20T23:40:53.731089 - 
+2026-01-20T23:40:53.740259 - Traceback (most recent call last):
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\nodes.py", line 2155, in load_custom_node
+    module_spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 999, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\jovimetrix\__init__.py", line 42, in <module>
+    from cozy_comfyui import \
+ModuleNotFoundError: No module named 'cozy_comfyui'
+
+2026-01-20T23:40:53.740259 - Cannot import C:\Users\rafae\Documents\ComfyUI\custom_nodes\jovimetrix module for custom nodes: No module named 'cozy_comfyui'
+2026-01-20T23:40:53.837645 - [37m[1m[RemoveBackground_SET] Registering 15 node(s) for version 1.0.0.[0m
+2026-01-20T23:40:53.902784 - 
+2026-01-20T23:40:53.902784 - [92m[rgthree-comfy] Loaded 48 exciting nodes. 🎉[0m2026-01-20T23:40:53.902784 - 
+2026-01-20T23:40:53.902784 - 
+2026-01-20T23:40:53.902784 - [33m[rgthree-comfy] ComfyUI's new Node 2.0 rendering may be incompatible with some rgthree-comfy nodes and features, breaking some rendering as well as losing the ability to access a node's properties (a vital part of many nodes). It also appears to run MUCH more slowly spiking CPU usage and causing jankiness and unresponsiveness, especially with large workflows. Personally I am not planning to use the new Nodes 2.0 and, unfortunately, am not able to invest the time to investigate and overhaul rgthree-comfy where needed. If you have issues when Nodes 2.0 is enabled, I'd urge you to switch it off as well and join me in hoping ComfyUI is not planning to deprecate the existing, stable canvas rendering all together.
+[0m2026-01-20T23:40:53.902784 - 
+2026-01-20T23:40:53.908833 - ComfyUI-GGUF: Allowing full torch compile
+2026-01-20T23:40:53.925835 - [92m[tinyterraNodes] [32mLoaded[0m2026-01-20T23:40:53.927340 - 
+2026-01-20T23:40:55.055223 - [34mWAS Node Suite: [0mOpenCV Python FFMPEG support is enabled[0m2026-01-20T23:40:55.055223 - 
+2026-01-20T23:40:55.055223 - [34mWAS Node Suite [93mWarning: [0m`ffmpeg_bin_path` is not set in `C:\Users\rafae\Documents\ComfyUI\custom_nodes\was-node-suite-comfyui\was_suite_config.json` config file. Will attempt to use system ffmpeg binaries if available.[0m2026-01-20T23:40:55.055223 - 
+2026-01-20T23:40:56.073680 - [34mWAS Node Suite: [0mFinished.[0m [32mLoaded[0m [0m220[0m [32mnodes successfully.[0m2026-01-20T23:40:56.073680 - 
+2026-01-20T23:40:56.073680 - 
+	[3m[93m"Art is the mirror that reflects the beauty within us."[0m[3m - Unknown[0m
+2026-01-20T23:40:56.073680 - 
+2026-01-20T23:40:56.089983 - Blocked by policy: C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\custom_nodes\ComfyUI-Manager
+2026-01-20T23:40:56.090987 - 
+Import times for custom nodes:
+2026-01-20T23:40:56.092001 -    0.0 seconds: C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\custom_nodes\websocket_image_save.py
+2026-01-20T23:40:56.092001 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\ComfyUI_bnb_nf4_fp4_Loaders
+2026-01-20T23:40:56.092001 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-maskEditor-extension
+2026-01-20T23:40:56.092001 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mesh2motion
+2026-01-20T23:40:56.092001 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\Comfyui-Resolution-Master
+2026-01-20T23:40:56.092001 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-qwenmultiangle
+2026-01-20T23:40:56.092001 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\cg-use-everywhere
+2026-01-20T23:40:56.092001 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mxtoolkit
+2026-01-20T23:40:56.092001 -    0.0 seconds (IMPORT FAILED): C:\Users\rafae\Documents\ComfyUI\custom_nodes\jovimetrix
+2026-01-20T23:40:56.092001 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\ComfyUI-GGUF
+2026-01-20T23:40:56.092001 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_ipadapter_plus
+2026-01-20T23:40:56.093005 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\chaosaiart-nodes
+2026-01-20T23:40:56.093005 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_ai_assistant
+2026-01-20T23:40:56.093005 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\smartmodelloaders-mxd
+2026-01-20T23:40:56.093005 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\woohee-hf-loader
+2026-01-20T23:40:56.093005 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\kiko-prompt-builder
+2026-01-20T23:40:56.093005 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_essentials
+2026-01-20T23:40:56.093005 -    0.0 seconds (IMPORT FAILED): C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-prompt-control
+2026-01-20T23:40:56.093005 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-flow-assistor
+2026-01-20T23:40:56.093005 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\removebackgroundsuite
+2026-01-20T23:40:56.093005 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-multigpu
+2026-01-20T23:40:56.093005 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-curve
+2026-01-20T23:40:56.093005 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-advanced-controlnet
+2026-01-20T23:40:56.093005 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-kjnodes
+2026-01-20T23:40:56.094513 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-ltx2-efficient
+2026-01-20T23:40:56.094513 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\rgthree-comfy
+2026-01-20T23:40:56.094513 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_controlnet_aux
+2026-01-20T23:40:56.094513 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_birefnet_ll
+2026-01-20T23:40:56.094513 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-inspire-pack
+2026-01-20T23:40:56.094513 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\remove-background
+2026-01-20T23:40:56.094513 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-easy-use
+2026-01-20T23:40:56.094513 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\tinyterralynodes
+2026-01-20T23:40:56.094513 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_layerstyle
+2026-01-20T23:40:56.094513 -    0.2 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-impact-pack
+2026-01-20T23:40:56.095525 -    0.2 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg
+2026-01-20T23:40:56.095525 -    0.3 seconds (IMPORT FAILED): C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-controlnetaux
+2026-01-20T23:40:56.095525 -    0.3 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\ComfyUI_XISER_Nodes
+2026-01-20T23:40:56.095525 -    0.4 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfy-mtb
+2026-01-20T23:40:56.095525 -    0.4 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\birefnet_universal
+2026-01-20T23:40:56.096030 -    0.6 seconds (IMPORT FAILED): C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-anyline
+2026-01-20T23:40:56.096030 -    0.6 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-birefnet
+2026-01-20T23:40:56.096030 -    0.6 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-videohelpersuite
+2026-01-20T23:40:56.096030 -    2.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\was-node-suite-comfyui
+2026-01-20T23:40:56.096030 -    2.3 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\ComfyUI-Copilot
+2026-01-20T23:40:56.096030 -    3.3 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_custom_nodes_alekpet
+2026-01-20T23:40:56.096030 -    3.3 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mixlab-nodes
+2026-01-20T23:40:56.096030 -    5.6 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-chord
+2026-01-20T23:40:56.096030 - 
+2026-01-20T23:40:56.337938 - setup plugin alembic.autogenerate.schemas
+2026-01-20T23:40:56.337938 - setup plugin alembic.autogenerate.tables
+2026-01-20T23:40:56.337938 - setup plugin alembic.autogenerate.types
+2026-01-20T23:40:56.337938 - setup plugin alembic.autogenerate.constraints
+2026-01-20T23:40:56.337938 - setup plugin alembic.autogenerate.defaults
+2026-01-20T23:40:56.337938 - setup plugin alembic.autogenerate.comments
+2026-01-20T23:40:56.370052 - Failed to initialize database. Please ensure you have installed the latest requirements. If the error persists, please report this as in future the database will be required: (sqlite3.OperationalError) unable to open database file
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-01-20T23:40:56.488322 - Starting server
+
+2026-01-20T23:40:56.489328 - To see the GUI go to: http://127.0.0.1:8000
+2026-01-20T23:40:57.316314 - comfyui-frontend-package not found in requirements.txt
+2026-01-20T23:40:58.837497 - [DEPRECATION WARNING] Detected import of deprecated legacy API: /scripts/ui.js. This is likely caused by a custom node extension using outdated APIs. Please update your extensions or contact the extension author for an updated version.
+2026-01-20T23:40:58.847815 - [DEPRECATION WARNING] Detected import of deprecated legacy API: /extensions/core/clipspace.js. This is likely caused by a custom node extension using outdated APIs. Please update your extensions or contact the extension author for an updated version.
+2026-01-20T23:40:58.976423 - C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/photoswipe-lightbox.esm.min.js2026-01-20T23:40:58.978424 - 
+2026-01-20T23:40:59.021562 - [DEPRECATION WARNING] Detected import of deprecated legacy API: /extensions/core/groupNode.js. This is likely caused by a custom node extension using outdated APIs. Please update your extensions or contact the extension author for an updated version.
+2026-01-20T23:40:59.065525 - [DEPRECATION WARNING] Detected import of deprecated legacy API: /extensions/core/widgetInputs.js. This is likely caused by a custom node extension using outdated APIs. Please update your extensions or contact the extension author for an updated version.
+2026-01-20T23:40:59.066552 - C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/photoswipe.min.css2026-01-20T23:40:59.066552 - 
+2026-01-20T23:40:59.737838 - [36;20m[C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfy-mtb] | INFO -> Found multiple match, we will pick the last C:\Users\rafae\Documents\ComfyUI\models\upscale_models
+['K:\\ComfyUI\\models\\upscale_models', 'C:\\Users\\rafae\\Documents\\ComfyUI\\models\\upscale_models'][0m
+2026-01-20T23:41:01.137519 - C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/classic.min.css2026-01-20T23:41:01.137519 - 
+2026-01-20T23:41:01.147913 - C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/juxtapose.css2026-01-20T23:41:01.147913 - 
+2026-01-20T23:41:01.162756 - C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/model-viewer.min.js2026-01-20T23:41:01.163758 - 
+2026-01-20T23:41:01.256393 - C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/pickr.min.js2026-01-20T23:41:01.256393 - 
+2026-01-20T23:41:01.260558 - C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/juxtapose.min.js2026-01-20T23:41:01.261601 - 
+2026-01-20T23:42:02.130733 - FETCH ComfyRegistry Data [DONE]
+2026-01-20T23:42:02.480423 - [ComfyUI-Manager] default cache updated: https://api.comfy.org/nodes
+2026-01-20T23:42:02.553079 - FETCH DATA from: C:\Users\rafae\Documents\ComfyUI\user\__manager\cache\1514988643_custom-node-list.json2026-01-20T23:42:02.553079 - 2026-01-20T23:42:02.590238 -  [DONE]2026-01-20T23:42:02.590238 - 
+2026-01-20T23:42:02.654265 - [ComfyUI-Manager] All startup tasks have been completed.
+2026-01-20T23:44:51.470319 - got prompt
+2026-01-20T23:44:53.562135 - Missing VAE keys ['decoder.timestep_scale_multiplier', 'decoder.last_scale_shift_table', 'decoder.up_blocks.0.time_embedder.timestep_embedder.linear_1.weight', 'decoder.up_blocks.0.time_embedder.timestep_embedder.linear_1.bias', 'decoder.up_blocks.0.time_embedder.timestep_embedder.linear_2.weight', 'decoder.up_blocks.0.time_embedder.timestep_embedder.linear_2.bias', 'decoder.up_blocks.0.res_blocks.0.scale_shift_table', 'decoder.up_blocks.0.res_blocks.1.scale_shift_table', 'decoder.up_blocks.0.res_blocks.2.scale_shift_table', 'decoder.up_blocks.0.res_blocks.3.scale_shift_table', 'decoder.up_blocks.0.res_blocks.4.scale_shift_table', 'decoder.up_blocks.2.time_embedder.timestep_embedder.linear_1.weight', 'decoder.up_blocks.2.time_embedder.timestep_embedder.linear_1.bias', 'decoder.up_blocks.2.time_embedder.timestep_embedder.linear_2.weight', 'decoder.up_blocks.2.time_embedder.timestep_embedder.linear_2.bias', 'decoder.up_blocks.2.res_blocks.0.scale_shift_table', 'decoder.up_blocks.2.res_blocks.1.scale_shift_table', 'decoder.up_blocks.2.res_blocks.2.scale_shift_table', 'decoder.up_blocks.2.res_blocks.3.scale_shift_table', 'decoder.up_blocks.2.res_blocks.4.scale_shift_table', 'decoder.up_blocks.4.time_embedder.timestep_embedder.linear_1.weight', 'decoder.up_blocks.4.time_embedder.timestep_embedder.linear_1.bias', 'decoder.up_blocks.4.time_embedder.timestep_embedder.linear_2.weight', 'decoder.up_blocks.4.time_embedder.timestep_embedder.linear_2.bias', 'decoder.up_blocks.4.res_blocks.0.scale_shift_table', 'decoder.up_blocks.4.res_blocks.1.scale_shift_table', 'decoder.up_blocks.4.res_blocks.2.scale_shift_table', 'decoder.up_blocks.4.res_blocks.3.scale_shift_table', 'decoder.up_blocks.4.res_blocks.4.scale_shift_table', 'decoder.up_blocks.6.time_embedder.timestep_embedder.linear_1.weight', 'decoder.up_blocks.6.time_embedder.timestep_embedder.linear_1.bias', 'decoder.up_blocks.6.time_embedder.timestep_embedder.linear_2.weight', 'decoder.up_blocks.6.time_embedder.timestep_embedder.linear_2.bias', 'decoder.up_blocks.6.res_blocks.0.scale_shift_table', 'decoder.up_blocks.6.res_blocks.1.scale_shift_table', 'decoder.up_blocks.6.res_blocks.2.scale_shift_table', 'decoder.up_blocks.6.res_blocks.3.scale_shift_table', 'decoder.up_blocks.6.res_blocks.4.scale_shift_table', 'decoder.last_time_embedder.timestep_embedder.linear_1.weight', 'decoder.last_time_embedder.timestep_embedder.linear_1.bias', 'decoder.last_time_embedder.timestep_embedder.linear_2.weight', 'decoder.last_time_embedder.timestep_embedder.linear_2.bias']
+2026-01-20T23:44:53.579380 - VAE load device: cuda:0, offload device: cpu, dtype: torch.float32
+2026-01-20T23:44:53.941574 - Requested to load VideoVAE
+2026-01-20T23:44:54.999838 - loaded partially; 3672.80 MB usable, 3348.73 MB loaded, 1407.72 MB offloaded, 324.01 MB buffer reserved, lowvram patches: 0
+2026-01-20T23:44:55.432522 - [LTX2SeparateAVLatent] Input type: NestedTensor, shape: torch.Size([1, 128, 4, 7, 12])2026-01-20T23:44:55.432522 - 
+2026-01-20T23:44:55.432522 - [LTX2SeparateAVLatent] Detected NestedTensor, attempting extraction...2026-01-20T23:44:55.432522 - 
+2026-01-20T23:44:55.432522 - [LTX2SeparateAVLatent] Successfully extracted. Video: torch.Size([1, 128, 4, 7, 12]), Audio: torch.Size([1, 8, 27, 16])2026-01-20T23:44:55.432522 - 
+2026-01-20T23:44:58.218786 - gguf qtypes: F32 (728), BF16 (7), Q5_K (336), Q6_K (144)
+2026-01-20T23:44:58.277924 - model weight dtype torch.bfloat16, manual cast: torch.float32
+2026-01-20T23:44:58.278467 - model_type FLUX
+2026-01-20T23:45:11.744150 - gguf qtypes: F32 (289), Q6_K (49), Q5_K (288)
+2026-01-20T23:45:11.939648 - Attempting to recreate sentencepiece tokenizer from GGUF file metadata...
+2026-01-20T23:45:26.169487 - Created tokenizer with vocab size of 262208
+2026-01-20T23:45:26.849794 - Dequantizing token_embd.weight to prevent runtime OOM.
+2026-01-20T23:45:29.893249 - [MultiGPU Core Patching] text_encoder_device_patched returning device: cuda:0 (current_text_encoder_device=cuda:0)
+2026-01-20T23:45:30.535267 - clip missing: ['multi_modal_projector.mm_input_projection_weight', 'multi_modal_projector.mm_soft_emb_norm.weight', 'vision_model.embeddings.patch_embedding.weight', 'vision_model.embeddings.patch_embedding.bias', 'vision_model.embeddings.position_embedding.weight', 'vision_model.encoder.layers.0.layer_norm1.weight', 'vision_model.encoder.layers.0.layer_norm1.bias', 'vision_model.encoder.layers.0.self_attn.q_proj.weight', 'vision_model.encoder.layers.0.self_attn.k_proj.weight', 'vision_model.encoder.layers.0.self_attn.v_proj.weight', 'vision_model.encoder.layers.0.self_attn.out_proj.weight', 'vision_model.encoder.layers.0.layer_norm2.weight', 'vision_model.encoder.layers.0.layer_norm2.bias', 'vision_model.encoder.layers.0.mlp.fc1.weight', 'vision_model.encoder.layers.0.mlp.fc2.weight', 'vision_model.encoder.layers.1.layer_norm1.weight', 'vision_model.encoder.layers.1.layer_norm1.bias', 'vision_model.encoder.layers.1.self_attn.q_proj.weight', 'vision_model.encoder.layers.1.self_attn.k_proj.weight', 'vision_model.encoder.layers.1.self_attn.v_proj.weight', 'vision_model.encoder.layers.1.self_attn.out_proj.weight', 'vision_model.encoder.layers.1.layer_norm2.weight', 'vision_model.encoder.layers.1.layer_norm2.bias', 'vision_model.encoder.layers.1.mlp.fc1.weight', 'vision_model.encoder.layers.1.mlp.fc2.weight', 'vision_model.encoder.layers.2.layer_norm1.weight', 'vision_model.encoder.layers.2.layer_norm1.bias', 'vision_model.encoder.layers.2.self_attn.q_proj.weight', 'vision_model.encoder.layers.2.self_attn.k_proj.weight', 'vision_model.encoder.layers.2.self_attn.v_proj.weight', 'vision_model.encoder.layers.2.self_attn.out_proj.weight', 'vision_model.encoder.layers.2.layer_norm2.weight', 'vision_model.encoder.layers.2.layer_norm2.bias', 'vision_model.encoder.layers.2.mlp.fc1.weight', 'vision_model.encoder.layers.2.mlp.fc2.weight', 'vision_model.encoder.layers.3.layer_norm1.weight', 'vision_model.encoder.layers.3.layer_norm1.bias', 'vision_model.encoder.layers.3.self_attn.q_proj.weight', 'vision_model.encoder.layers.3.self_attn.k_proj.weight', 'vision_model.encoder.layers.3.self_attn.v_proj.weight', 'vision_model.encoder.layers.3.self_attn.out_proj.weight', 'vision_model.encoder.layers.3.layer_norm2.weight', 'vision_model.encoder.layers.3.layer_norm2.bias', 'vision_model.encoder.layers.3.mlp.fc1.weight', 'vision_model.encoder.layers.3.mlp.fc2.weight', 'vision_model.encoder.layers.4.layer_norm1.weight', 'vision_model.encoder.layers.4.layer_norm1.bias', 'vision_model.encoder.layers.4.self_attn.q_proj.weight', 'vision_model.encoder.layers.4.self_attn.k_proj.weight', 'vision_model.encoder.layers.4.self_attn.v_proj.weight', 'vision_model.encoder.layers.4.self_attn.out_proj.weight', 'vision_model.encoder.layers.4.layer_norm2.weight', 'vision_model.encoder.layers.4.layer_norm2.bias', 'vision_model.encoder.layers.4.mlp.fc1.weight', 'vision_model.encoder.layers.4.mlp.fc2.weight', 'vision_model.encoder.layers.5.layer_norm1.weight', 'vision_model.encoder.layers.5.layer_norm1.bias', 'vision_model.encoder.layers.5.self_attn.q_proj.weight', 'vision_model.encoder.layers.5.self_attn.k_proj.weight', 'vision_model.encoder.layers.5.self_attn.v_proj.weight', 'vision_model.encoder.layers.5.self_attn.out_proj.weight', 'vision_model.encoder.layers.5.layer_norm2.weight', 'vision_model.encoder.layers.5.layer_norm2.bias', 'vision_model.encoder.layers.5.mlp.fc1.weight', 'vision_model.encoder.layers.5.mlp.fc2.weight', 'vision_model.encoder.layers.6.layer_norm1.weight', 'vision_model.encoder.layers.6.layer_norm1.bias', 'vision_model.encoder.layers.6.self_attn.q_proj.weight', 'vision_model.encoder.layers.6.self_attn.k_proj.weight', 'vision_model.encoder.layers.6.self_attn.v_proj.weight', 'vision_model.encoder.layers.6.self_attn.out_proj.weight', 'vision_model.encoder.layers.6.layer_norm2.weight', 'vision_model.encoder.layers.6.layer_norm2.bias', 'vision_model.encoder.layers.6.mlp.fc1.weight', 'vision_model.encoder.layers.6.mlp.fc2.weight', 'vision_model.encoder.layers.7.layer_norm1.weight', 'vision_model.encoder.layers.7.layer_norm1.bias', 'vision_model.encoder.layers.7.self_attn.q_proj.weight', 'vision_model.encoder.layers.7.self_attn.k_proj.weight', 'vision_model.encoder.layers.7.self_attn.v_proj.weight', 'vision_model.encoder.layers.7.self_attn.out_proj.weight', 'vision_model.encoder.layers.7.layer_norm2.weight', 'vision_model.encoder.layers.7.layer_norm2.bias', 'vision_model.encoder.layers.7.mlp.fc1.weight', 'vision_model.encoder.layers.7.mlp.fc2.weight', 'vision_model.encoder.layers.8.layer_norm1.weight', 'vision_model.encoder.layers.8.layer_norm1.bias', 'vision_model.encoder.layers.8.self_attn.q_proj.weight', 'vision_model.encoder.layers.8.self_attn.k_proj.weight', 'vision_model.encoder.layers.8.self_attn.v_proj.weight', 'vision_model.encoder.layers.8.self_attn.out_proj.weight', 'vision_model.encoder.layers.8.layer_norm2.weight', 'vision_model.encoder.layers.8.layer_norm2.bias', 'vision_model.encoder.layers.8.mlp.fc1.weight', 'vision_model.encoder.layers.8.mlp.fc2.weight', 'vision_model.encoder.layers.9.layer_norm1.weight', 'vision_model.encoder.layers.9.layer_norm1.bias', 'vision_model.encoder.layers.9.self_attn.q_proj.weight', 'vision_model.encoder.layers.9.self_attn.k_proj.weight', 'vision_model.encoder.layers.9.self_attn.v_proj.weight', 'vision_model.encoder.layers.9.self_attn.out_proj.weight', 'vision_model.encoder.layers.9.layer_norm2.weight', 'vision_model.encoder.layers.9.layer_norm2.bias', 'vision_model.encoder.layers.9.mlp.fc1.weight', 'vision_model.encoder.layers.9.mlp.fc2.weight', 'vision_model.encoder.layers.10.layer_norm1.weight', 'vision_model.encoder.layers.10.layer_norm1.bias', 'vision_model.encoder.layers.10.self_attn.q_proj.weight', 'vision_model.encoder.layers.10.self_attn.k_proj.weight', 'vision_model.encoder.layers.10.self_attn.v_proj.weight', 'vision_model.encoder.layers.10.self_attn.out_proj.weight', 'vision_model.encoder.layers.10.layer_norm2.weight', 'vision_model.encoder.layers.10.layer_norm2.bias', 'vision_model.encoder.layers.10.mlp.fc1.weight', 'vision_model.encoder.layers.10.mlp.fc2.weight', 'vision_model.encoder.layers.11.layer_norm1.weight', 'vision_model.encoder.layers.11.layer_norm1.bias', 'vision_model.encoder.layers.11.self_attn.q_proj.weight', 'vision_model.encoder.layers.11.self_attn.k_proj.weight', 'vision_model.encoder.layers.11.self_attn.v_proj.weight', 'vision_model.encoder.layers.11.self_attn.out_proj.weight', 'vision_model.encoder.layers.11.layer_norm2.weight', 'vision_model.encoder.layers.11.layer_norm2.bias', 'vision_model.encoder.layers.11.mlp.fc1.weight', 'vision_model.encoder.layers.11.mlp.fc2.weight', 'vision_model.encoder.layers.12.layer_norm1.weight', 'vision_model.encoder.layers.12.layer_norm1.bias', 'vision_model.encoder.layers.12.self_attn.q_proj.weight', 'vision_model.encoder.layers.12.self_attn.k_proj.weight', 'vision_model.encoder.layers.12.self_attn.v_proj.weight', 'vision_model.encoder.layers.12.self_attn.out_proj.weight', 'vision_model.encoder.layers.12.layer_norm2.weight', 'vision_model.encoder.layers.12.layer_norm2.bias', 'vision_model.encoder.layers.12.mlp.fc1.weight', 'vision_model.encoder.layers.12.mlp.fc2.weight', 'vision_model.encoder.layers.13.layer_norm1.weight', 'vision_model.encoder.layers.13.layer_norm1.bias', 'vision_model.encoder.layers.13.self_attn.q_proj.weight', 'vision_model.encoder.layers.13.self_attn.k_proj.weight', 'vision_model.encoder.layers.13.self_attn.v_proj.weight', 'vision_model.encoder.layers.13.self_attn.out_proj.weight', 'vision_model.encoder.layers.13.layer_norm2.weight', 'vision_model.encoder.layers.13.layer_norm2.bias', 'vision_model.encoder.layers.13.mlp.fc1.weight', 'vision_model.encoder.layers.13.mlp.fc2.weight', 'vision_model.encoder.layers.14.layer_norm1.weight', 'vision_model.encoder.layers.14.layer_norm1.bias', 'vision_model.encoder.layers.14.self_attn.q_proj.weight', 'vision_model.encoder.layers.14.self_attn.k_proj.weight', 'vision_model.encoder.layers.14.self_attn.v_proj.weight', 'vision_model.encoder.layers.14.self_attn.out_proj.weight', 'vision_model.encoder.layers.14.layer_norm2.weight', 'vision_model.encoder.layers.14.layer_norm2.bias', 'vision_model.encoder.layers.14.mlp.fc1.weight', 'vision_model.encoder.layers.14.mlp.fc2.weight', 'vision_model.encoder.layers.15.layer_norm1.weight', 'vision_model.encoder.layers.15.layer_norm1.bias', 'vision_model.encoder.layers.15.self_attn.q_proj.weight', 'vision_model.encoder.layers.15.self_attn.k_proj.weight', 'vision_model.encoder.layers.15.self_attn.v_proj.weight', 'vision_model.encoder.layers.15.self_attn.out_proj.weight', 'vision_model.encoder.layers.15.layer_norm2.weight', 'vision_model.encoder.layers.15.layer_norm2.bias', 'vision_model.encoder.layers.15.mlp.fc1.weight', 'vision_model.encoder.layers.15.mlp.fc2.weight', 'vision_model.encoder.layers.16.layer_norm1.weight', 'vision_model.encoder.layers.16.layer_norm1.bias', 'vision_model.encoder.layers.16.self_attn.q_proj.weight', 'vision_model.encoder.layers.16.self_attn.k_proj.weight', 'vision_model.encoder.layers.16.self_attn.v_proj.weight', 'vision_model.encoder.layers.16.self_attn.out_proj.weight', 'vision_model.encoder.layers.16.layer_norm2.weight', 'vision_model.encoder.layers.16.layer_norm2.bias', 'vision_model.encoder.layers.16.mlp.fc1.weight', 'vision_model.encoder.layers.16.mlp.fc2.weight', 'vision_model.encoder.layers.17.layer_norm1.weight', 'vision_model.encoder.layers.17.layer_norm1.bias', 'vision_model.encoder.layers.17.self_attn.q_proj.weight', 'vision_model.encoder.layers.17.self_attn.k_proj.weight', 'vision_model.encoder.layers.17.self_attn.v_proj.weight', 'vision_model.encoder.layers.17.self_attn.out_proj.weight', 'vision_model.encoder.layers.17.layer_norm2.weight', 'vision_model.encoder.layers.17.layer_norm2.bias', 'vision_model.encoder.layers.17.mlp.fc1.weight', 'vision_model.encoder.layers.17.mlp.fc2.weight', 'vision_model.encoder.layers.18.layer_norm1.weight', 'vision_model.encoder.layers.18.layer_norm1.bias', 'vision_model.encoder.layers.18.self_attn.q_proj.weight', 'vision_model.encoder.layers.18.self_attn.k_proj.weight', 'vision_model.encoder.layers.18.self_attn.v_proj.weight', 'vision_model.encoder.layers.18.self_attn.out_proj.weight', 'vision_model.encoder.layers.18.layer_norm2.weight', 'vision_model.encoder.layers.18.layer_norm2.bias', 'vision_model.encoder.layers.18.mlp.fc1.weight', 'vision_model.encoder.layers.18.mlp.fc2.weight', 'vision_model.encoder.layers.19.layer_norm1.weight', 'vision_model.encoder.layers.19.layer_norm1.bias', 'vision_model.encoder.layers.19.self_attn.q_proj.weight', 'vision_model.encoder.layers.19.self_attn.k_proj.weight', 'vision_model.encoder.layers.19.self_attn.v_proj.weight', 'vision_model.encoder.layers.19.self_attn.out_proj.weight', 'vision_model.encoder.layers.19.layer_norm2.weight', 'vision_model.encoder.layers.19.layer_norm2.bias', 'vision_model.encoder.layers.19.mlp.fc1.weight', 'vision_model.encoder.layers.19.mlp.fc2.weight', 'vision_model.encoder.layers.20.layer_norm1.weight', 'vision_model.encoder.layers.20.layer_norm1.bias', 'vision_model.encoder.layers.20.self_attn.q_proj.weight', 'vision_model.encoder.layers.20.self_attn.k_proj.weight', 'vision_model.encoder.layers.20.self_attn.v_proj.weight', 'vision_model.encoder.layers.20.self_attn.out_proj.weight', 'vision_model.encoder.layers.20.layer_norm2.weight', 'vision_model.encoder.layers.20.layer_norm2.bias', 'vision_model.encoder.layers.20.mlp.fc1.weight', 'vision_model.encoder.layers.20.mlp.fc2.weight', 'vision_model.encoder.layers.21.layer_norm1.weight', 'vision_model.encoder.layers.21.layer_norm1.bias', 'vision_model.encoder.layers.21.self_attn.q_proj.weight', 'vision_model.encoder.layers.21.self_attn.k_proj.weight', 'vision_model.encoder.layers.21.self_attn.v_proj.weight', 'vision_model.encoder.layers.21.self_attn.out_proj.weight', 'vision_model.encoder.layers.21.layer_norm2.weight', 'vision_model.encoder.layers.21.layer_norm2.bias', 'vision_model.encoder.layers.21.mlp.fc1.weight', 'vision_model.encoder.layers.21.mlp.fc2.weight', 'vision_model.encoder.layers.22.layer_norm1.weight', 'vision_model.encoder.layers.22.layer_norm1.bias', 'vision_model.encoder.layers.22.self_attn.q_proj.weight', 'vision_model.encoder.layers.22.self_attn.k_proj.weight', 'vision_model.encoder.layers.22.self_attn.v_proj.weight', 'vision_model.encoder.layers.22.self_attn.out_proj.weight', 'vision_model.encoder.layers.22.layer_norm2.weight', 'vision_model.encoder.layers.22.layer_norm2.bias', 'vision_model.encoder.layers.22.mlp.fc1.weight', 'vision_model.encoder.layers.22.mlp.fc2.weight', 'vision_model.encoder.layers.23.layer_norm1.weight', 'vision_model.encoder.layers.23.layer_norm1.bias', 'vision_model.encoder.layers.23.self_attn.q_proj.weight', 'vision_model.encoder.layers.23.self_attn.k_proj.weight', 'vision_model.encoder.layers.23.self_attn.v_proj.weight', 'vision_model.encoder.layers.23.self_attn.out_proj.weight', 'vision_model.encoder.layers.23.layer_norm2.weight', 'vision_model.encoder.layers.23.layer_norm2.bias', 'vision_model.encoder.layers.23.mlp.fc1.weight', 'vision_model.encoder.layers.23.mlp.fc2.weight', 'vision_model.encoder.layers.24.layer_norm1.weight', 'vision_model.encoder.layers.24.layer_norm1.bias', 'vision_model.encoder.layers.24.self_attn.q_proj.weight', 'vision_model.encoder.layers.24.self_attn.k_proj.weight', 'vision_model.encoder.layers.24.self_attn.v_proj.weight', 'vision_model.encoder.layers.24.self_attn.out_proj.weight', 'vision_model.encoder.layers.24.layer_norm2.weight', 'vision_model.encoder.layers.24.layer_norm2.bias', 'vision_model.encoder.layers.24.mlp.fc1.weight', 'vision_model.encoder.layers.24.mlp.fc2.weight', 'vision_model.encoder.layers.25.layer_norm1.weight', 'vision_model.encoder.layers.25.layer_norm1.bias', 'vision_model.encoder.layers.25.self_attn.q_proj.weight', 'vision_model.encoder.layers.25.self_attn.k_proj.weight', 'vision_model.encoder.layers.25.self_attn.v_proj.weight', 'vision_model.encoder.layers.25.self_attn.out_proj.weight', 'vision_model.encoder.layers.25.layer_norm2.weight', 'vision_model.encoder.layers.25.layer_norm2.bias', 'vision_model.encoder.layers.25.mlp.fc1.weight', 'vision_model.encoder.layers.25.mlp.fc2.weight', 'vision_model.encoder.layers.26.layer_norm1.weight', 'vision_model.encoder.layers.26.layer_norm1.bias', 'vision_model.encoder.layers.26.self_attn.q_proj.weight', 'vision_model.encoder.layers.26.self_attn.k_proj.weight', 'vision_model.encoder.layers.26.self_attn.v_proj.weight', 'vision_model.encoder.layers.26.self_attn.out_proj.weight', 'vision_model.encoder.layers.26.layer_norm2.weight', 'vision_model.encoder.layers.26.layer_norm2.bias', 'vision_model.encoder.layers.26.mlp.fc1.weight', 'vision_model.encoder.layers.26.mlp.fc2.weight', 'vision_model.post_layernorm.weight', 'vision_model.post_layernorm.bias']
+2026-01-20T23:45:30.543879 - clip missing: ['gemma3_12b.logit_scale', 'gemma3_12b.transformer.model.layers.0.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.0.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.0.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.0.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.0.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.0.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.1.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.1.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.1.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.1.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.1.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.1.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.2.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.2.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.2.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.2.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.2.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.2.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.3.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.3.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.3.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.3.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.3.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.3.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.4.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.4.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.4.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.4.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.4.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.4.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.5.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.5.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.5.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.5.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.5.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.5.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.6.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.6.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.6.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.6.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.6.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.6.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.7.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.7.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.7.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.7.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.7.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.7.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.8.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.8.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.8.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.8.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.8.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.8.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.9.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.9.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.9.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.9.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.9.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.9.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.10.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.10.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.10.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.10.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.10.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.10.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.11.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.11.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.11.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.11.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.11.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.11.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.12.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.12.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.12.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.12.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.12.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.12.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.13.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.13.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.13.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.13.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.13.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.13.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.14.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.14.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.14.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.14.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.14.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.14.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.15.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.15.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.15.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.15.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.15.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.15.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.16.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.16.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.16.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.16.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.16.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.16.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.17.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.17.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.17.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.17.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.17.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.17.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.18.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.18.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.18.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.18.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.18.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.18.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.19.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.19.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.19.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.19.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.19.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.19.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.20.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.20.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.20.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.20.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.20.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.20.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.21.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.21.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.21.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.21.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.21.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.21.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.22.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.22.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.22.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.22.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.22.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.22.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.23.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.23.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.23.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.23.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.23.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.23.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.24.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.24.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.24.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.24.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.24.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.24.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.25.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.25.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.25.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.25.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.25.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.25.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.26.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.26.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.26.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.26.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.26.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.26.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.27.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.27.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.27.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.27.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.27.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.27.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.28.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.28.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.28.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.28.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.28.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.28.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.29.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.29.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.29.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.29.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.29.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.29.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.30.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.30.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.30.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.30.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.30.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.30.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.31.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.31.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.31.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.31.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.31.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.31.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.32.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.32.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.32.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.32.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.32.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.32.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.33.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.33.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.33.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.33.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.33.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.33.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.34.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.34.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.34.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.34.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.34.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.34.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.35.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.35.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.35.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.35.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.35.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.35.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.36.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.36.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.36.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.36.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.36.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.36.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.37.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.37.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.37.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.37.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.37.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.37.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.38.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.38.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.38.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.38.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.38.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.38.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.39.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.39.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.39.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.39.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.39.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.39.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.40.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.40.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.40.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.40.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.40.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.40.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.41.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.41.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.41.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.41.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.41.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.41.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.42.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.42.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.42.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.42.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.42.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.42.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.43.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.43.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.43.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.43.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.43.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.43.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.44.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.44.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.44.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.44.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.44.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.44.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.45.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.45.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.45.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.45.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.45.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.45.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.46.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.46.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.46.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.46.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.46.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.46.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.47.self_attn.q_norm.weight', 'gemma3_12b.transformer.model.layers.47.self_attn.k_norm.weight', 'gemma3_12b.transformer.model.layers.47.input_layernorm.weight', 'gemma3_12b.transformer.model.layers.47.post_attention_layernorm.weight', 'gemma3_12b.transformer.model.layers.47.pre_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.layers.47.post_feedforward_layernorm.weight', 'gemma3_12b.transformer.model.norm.weight', 'gemma3_12b.transformer.multi_modal_projector.mm_input_projection_weight', 'gemma3_12b.transformer.multi_modal_projector.mm_soft_emb_norm.weight', 'gemma3_12b.transformer.vision_model.embeddings.patch_embedding.weight', 'gemma3_12b.transformer.vision_model.embeddings.patch_embedding.bias', 'gemma3_12b.transformer.vision_model.embeddings.position_embedding.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.0.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.0.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.0.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.0.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.1.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.1.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.1.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.1.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.2.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.2.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.2.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.2.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.3.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.3.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.3.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.3.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.4.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.4.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.4.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.4.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.5.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.5.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.5.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.5.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.6.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.6.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.6.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.6.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.7.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.7.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.7.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.7.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.8.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.8.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.8.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.8.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.9.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.9.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.9.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.9.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.10.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.10.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.10.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.10.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.11.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.11.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.11.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.11.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.12.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.12.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.12.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.12.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.13.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.13.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.13.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.13.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.14.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.14.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.14.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.14.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.15.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.15.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.15.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.15.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.16.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.16.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.16.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.16.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.17.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.17.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.17.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.17.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.18.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.18.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.18.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.18.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.19.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.19.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.19.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.19.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.20.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.20.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.20.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.20.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.21.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.21.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.21.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.21.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.22.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.22.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.22.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.22.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.23.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.23.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.23.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.23.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.24.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.24.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.24.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.24.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.25.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.25.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.25.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.25.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.26.layer_norm1.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.26.layer_norm1.bias', 'gemma3_12b.transformer.vision_model.encoder.layers.26.layer_norm2.weight', 'gemma3_12b.transformer.vision_model.encoder.layers.26.layer_norm2.bias', 'gemma3_12b.transformer.vision_model.post_layernorm.weight', 'gemma3_12b.transformer.vision_model.post_layernorm.bias']
+2026-01-20T23:45:30.543879 - CLIP/text encoder model load device: cuda:0, offload device: cpu, current: cpu, dtype: torch.float16
+2026-01-20T23:45:30.566343 - Requested to load LTXAVTEModel_
+2026-01-20T23:45:41.793348 - loaded partially; 2846.00 MB usable, 0.00 MB loaded, 13495.11 MB offloaded, 7252.06 MB buffer reserved, lowvram patches: 0
+2026-01-20T23:45:41.794355 - Attempting to release mmap (290)
+2026-01-20T23:45:49.119217 - [LTX2ConditioningHelper] Slicing embedding: torch.Size([1, 1024, 7680]) -> (..., 4096)2026-01-20T23:45:49.119217 - 
+2026-01-20T23:45:49.121438 - [AdaptiveCache] Initialized with cache_ratio=0.50, threshold=0.1002026-01-20T23:45:49.121438 - 
+2026-01-20T23:45:49.122442 - [LTX2Efficient] Using optimization engine: AdaptiveCache2026-01-20T23:45:49.122442 - 
+2026-01-20T23:45:49.122442 - [LTX2Efficient] Using preset: Quality - Cool (RTX 2060 6GB)2026-01-20T23:45:49.122442 - 
+2026-01-20T23:45:49.122442 - [LTX2Efficient] -> freeze_ratio=0.25, throttle_delay=100ms, frame_stride=12026-01-20T23:45:49.122442 - 
+2026-01-20T23:45:49.123444 - [LTX2Efficient] ⚠️ WARNING: Latent dimensions (12x7) are odd! Video will likely be noisy.2026-01-20T23:45:49.123444 - 
+2026-01-20T23:45:49.123444 - [LTX2Efficient] Keyframe selection: 4 frames -> 4 keyframes (stride=1)2026-01-20T23:45:49.123444 - 
+2026-01-20T23:45:49.123444 - [LTX2Efficient] Keyframes shape: torch.Size([1, 128, 4, 7, 12])2026-01-20T23:45:49.123444 - 
+2026-01-20T23:45:49.126048 - [LTX2Efficient] Patched 96 attention layers (attn1=48, attn2=48)2026-01-20T23:45:49.126048 - 
+2026-01-20T23:45:49.126048 - [LTX2Patcher] Patched top-level model forward to inject 'attention_mask'2026-01-20T23:45:49.126048 - 
+2026-01-20T23:45:49.126048 - [LTX2Efficient] Sampling on reduced frames: torch.Size([1, 128, 4, 7, 12]) (Stride=1)2026-01-20T23:45:49.126048 - 
+2026-01-20T23:45:49.131313 - Requested to load LTXV
+2026-01-20T23:45:58.993743 - loaded partially; 3641.67 MB usable, 3333.48 MB loaded, 6221.94 MB offloaded, 308.19 MB buffer reserved, lowvram patches: 0
+2026-01-20T23:45:59.057714 - 
+  0%|          | 0/20 [00:00<?, ?it/s]2026-01-20T23:45:59.536027 - 
+  0%|          | 0/20 [00:00<?, ?it/s]2026-01-20T23:45:59.536027 - 
+2026-01-20T23:45:59.536027 - [AdaptiveCache] Summary: 0 hits, 0 misses (0.0% hit rate)2026-01-20T23:45:59.536027 - 
+2026-01-20T23:45:59.555306 - !!! Exception during processing !!! The expanded size of the tensor (336) must match the existing size (2) at non-singleton dimension 2.  Target sizes: [2, 32, 336, 1024].  Tensor sizes: [1, 1, 2, 1024]
+2026-01-20T23:45:59.563980 - Traceback (most recent call last):
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\execution.py", line 518, in execute
+    output_data, output_ui, has_subgraph, has_pending_tasks = await get_output_data(prompt_id, unique_id, obj, input_data_all, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\execution.py", line 329, in get_output_data
+    return_values = await _async_map_node_over_list(prompt_id, unique_id, obj, input_data_all, obj.FUNCTION, allow_interrupt=True, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\execution.py", line 303, in _async_map_node_over_list
+    await process_inputs(input_dict, i)
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\execution.py", line 291, in process_inputs
+    result = f(**inputs)
+             ^^^^^^^^^^^
+  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-ltx2-efficient\nodes\ltx2_efficient_sampler.py", line 430, in sample
+    result_tensor = comfy.sample.sample(
+                    ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\sample.py", line 60, in sample
+    samples = sampler.sample(noise, positive, negative, cfg=cfg, latent_image=latent_image, start_step=start_step, last_step=last_step, force_full_denoise=force_full_denoise, denoise_mask=noise_mask, sigmas=sigmas, callback=callback, disable_pbar=disable_pbar, seed=seed)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 1178, in sample
+    return sample(self.model, noise, positive, negative, cfg, self.device, sampler, sigmas, self.model_options, latent_image=latent_image, denoise_mask=denoise_mask, callback=callback, disable_pbar=disable_pbar, seed=seed)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 1068, in sample
+    return cfg_guider.sample(noise, latent_image, sampler, sigmas, denoise_mask, callback, disable_pbar, seed)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 1050, in sample
+    output = executor.execute(noise, latent_image, sampler, sigmas, denoise_mask, callback, disable_pbar, seed, latent_shapes=latent_shapes)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\patcher_extension.py", line 112, in execute
+    return self.original(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 994, in outer_sample
+    output = self.inner_sample(noise, latent_image, device, sampler, sigmas, denoise_mask, callback, disable_pbar, seed, latent_shapes=latent_shapes)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 980, in inner_sample
+    samples = executor.execute(self, sigmas, extra_args, callback, noise, latent_image, denoise_mask, disable_pbar)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\patcher_extension.py", line 112, in execute
+    return self.original(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 752, in sample
+    samples = self.sampler_function(model_k, noise, sigmas, extra_args=extra_args, callback=k_callback, disable=disable_pbar, **self.extra_options)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\utils\_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\k_diffusion\sampling.py", line 202, in sample_euler
+    denoised = model(x, sigma_hat * s_in, **extra_args)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 401, in __call__
+    out = self.inner_model(x, sigma, model_options=model_options, seed=seed)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 953, in __call__
+    return self.outer_predict_noise(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 960, in outer_predict_noise
+    ).execute(x, timestep, model_options, seed)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\patcher_extension.py", line 112, in execute
+    return self.original(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 963, in predict_noise
+    return sampling_function(self.inner_model, x, timestep, self.conds.get("negative", None), self.conds.get("positive", None), self.cfg, model_options=model_options, seed=seed)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 381, in sampling_function
+    out = calc_cond_batch(model, conds, x, timestep, model_options)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 206, in calc_cond_batch
+    return _calc_cond_batch_outer(model, conds, x_in, timestep, model_options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 214, in _calc_cond_batch_outer
+    return executor.execute(model, conds, x_in, timestep, model_options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\patcher_extension.py", line 112, in execute
+    return self.original(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\samplers.py", line 326, in _calc_cond_batch
+    output = model.apply_model(input_x, timestep_, **c).chunk(batch_chunks)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\model_base.py", line 163, in apply_model
+    return comfy.patcher_extension.WrapperExecutor.new_class_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\patcher_extension.py", line 112, in execute
+    return self.original(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\model_base.py", line 205, in _apply_model
+    model_output = self.diffusion_model(xc, t, context=context, control=control, transformer_options=transformer_options, **extra_conds)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-ltx2-efficient\nodes\ltx2_efficient_sampler.py", line 604, in patched_forward
+    return original_forward(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 745, in forward
+    return comfy.patcher_extension.WrapperExecutor.new_class_executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\patcher_extension.py", line 112, in execute
+    return self.original(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 792, in _forward
+    x = self._process_transformer_blocks(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 915, in _process_transformer_blocks
+    x = block(
+        ^^^^^^
+  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 427, in forward
+    x += self.attn2(x, context=context, mask=attention_mask, transformer_options=transformer_options)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-ltx2-efficient\nodes\ltx2_efficient_sampler.py", line 649, in new_forward
+    return original_forward(x, context, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 382, in forward
+    out = comfy.ldm.modules.attention.optimized_attention_masked(q, k, v, self.heads, mask, attn_precision=self.attn_precision, transformer_options=transformer_options)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\modules\attention.py", line 137, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\modules\attention.py", line 503, in attention_pytorch
+    out = comfy.ops.scaled_dot_product_attention(q, k, v, attn_mask=mask, dropout_p=0.0, is_causal=False)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ops.py", line 52, in scaled_dot_product_attention
+    return torch.nn.functional.scaled_dot_product_attention(q, k, v, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: The expanded size of the tensor (336) must match the existing size (2) at non-singleton dimension 2.  Target sizes: [2, 32, 336, 1024].  Tensor sizes: [1, 1, 2, 1024]
+
+2026-01-20T23:45:59.568773 - Prompt executed in 68.09 seconds
+
+```
+## Attached Workflow
+Please make sure that workflow does not contain any sensitive information such as API keys or passwords.
+```
+Workflow too large. Please manually upload the workflow from local file system.
+```
+
+## Additional Context
+(Please add any additional context or steps to reproduce the error here)

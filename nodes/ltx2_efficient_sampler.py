@@ -83,7 +83,7 @@ class LTX2EfficientSampler:
                 "attention_window": ("INT", {"default": 4, "min": 1, "max": 32}),
                 "freeze_ratio": ("FLOAT", {"default": 0.3, "min": 0.0, "max": 1.0, "step": 0.05}),
                 "thermal_throttle": ("BOOLEAN", {"default": True}),
-                "interpolation_method": (["linear", "slerp", "motion"], {"default": "slerp"}),
+                "interpolation_method": (["linear", "slerp", "motion", "none"], {"default": "slerp"}),
                 # Optimization Engine settings
                 "optimization_engine": (get_engine_names(), {"default": "Adaptive Cache (2-4x speedup)", "tooltip": "Temporal attention optimization engine"}),
                 "engine_cache_ratio": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.1, "tooltip": "Fraction of later steps to cache (AdaCache)"}),
@@ -279,9 +279,9 @@ class LTX2EfficientSampler:
                 print(f"[LTX2Efficient] ⚠️ WARNING: Latent dimensions ({w}x{h}) are odd! Video will likely be noisy.")
             elif h % 4 != 0 or w % 4 != 0:
                  print(f"[LTX2Efficient] ⚠️ CRITICAL WARNING: Latent dimensions ({w}x{h}) not divisible by 4!")
-                 print(f"[LTX2Efficient] This corresponds to pixel resolution not divisible by 32 (e.g. 432px height).")
-                 print(f"[LTX2Efficient] LTX generally requires resolutions divisible by 32 (e.g. 448, 416, 768).")
-                 print(f"[LTX2Efficient] Your current height 432 is likely causing the noise. Try 448 or 416.")
+                 print(f"[LTX2Efficient] This corresponds to pixel resolution not divisible by 128 (e.g. 448px).")
+                 print(f"[LTX2Efficient] LTX generally requires resolutions divisible by 128 (e.g. 512, 640, 768).")
+                 print(f"[LTX2Efficient] Your current height {h*32} is likely causing the noise. Try 512 or 384.")
         except:
             pass
         
@@ -453,35 +453,40 @@ class LTX2EfficientSampler:
 
         # 4. Interpolate
         result_samples = result["samples"]
-        print(f"[LTX2Efficient] Interpolating with method: {interpolation_method}")
         
-        # Handle 5D (B,C,F,H,W) vs 4D (F,C,H,W) for interpolation
-        is_5d = result_samples.ndim == 5
-        
-        if is_5d:
-            # For 5D, we need to interpolate along the frame dimension (dim 2)
-            # Squeeze batch, interpolate frames, then unsqueeze
-            # Assume batch=1 for now (standard case)
-            batch_size = result_samples.shape[0]
-            frames_5d = result_samples[0]  # (C, F, H, W)
-            frames_transposed = frames_5d.permute(1, 0, 2, 3)  # (F, C, H, W) for interpolation
-            full_frames = interpolate(frames_transposed, frame_stride, method=interpolation_method)
-            # Transpose back and add batch
-            full_frames_5d = full_frames.permute(1, 0, 2, 3).unsqueeze(0)  # (1, C, F, H, W)
-            full_samples = full_frames_5d
-            
-            # Length check for 5D
-            full_frames_count = full_samples.shape[2]  # Frames at dim 2
-            if full_frames_count > original_frames_count:
-                full_samples = full_samples[:, :, :original_frames_count, :, :]
+        if interpolation_method == "none":
+            print(f"[LTX2Efficient] Interpolation skipped (method='none')")
+            full_samples = result_samples
         else:
-            # 4D case (F, C, H, W)
-            full_samples = interpolate(result_samples, frame_stride, method=interpolation_method)
+            print(f"[LTX2Efficient] Interpolating with method: {interpolation_method}")
             
-            # Handle potential length mismatch
-            full_frames_count = full_samples.shape[0]
-            if full_frames_count > original_frames_count:
-                full_samples = full_samples[:original_frames_count]
+            # Handle 5D (B,C,F,H,W) vs 4D (F,C,H,W) for interpolation
+            is_5d = result_samples.ndim == 5
+            
+            if is_5d:
+                # For 5D, we need to interpolate along the frame dimension (dim 2)
+                # Squeeze batch, interpolate frames, then unsqueeze
+                # Assume batch=1 for now (standard case)
+                batch_size = result_samples.shape[0]
+                frames_5d = result_samples[0]  # (C, F, H, W)
+                frames_transposed = frames_5d.permute(1, 0, 2, 3)  # (F, C, H, W) for interpolation
+                full_frames = interpolate(frames_transposed, frame_stride, method=interpolation_method)
+                # Transpose back and add batch
+                full_frames_5d = full_frames.permute(1, 0, 2, 3).unsqueeze(0)  # (1, C, F, H, W)
+                full_samples = full_frames_5d
+                
+                # Length check for 5D
+                full_frames_count = full_samples.shape[2]  # Frames at dim 2
+                if full_frames_count > original_frames_count:
+                    full_samples = full_samples[:, :, :original_frames_count, :, :]
+            else:
+                # 4D case (F, C, H, W)
+                full_samples = interpolate(result_samples, frame_stride, method=interpolation_method)
+                
+                # Handle potential length mismatch
+                full_frames_count = full_samples.shape[0]
+                if full_frames_count > original_frames_count:
+                    full_samples = full_samples[:original_frames_count]
         
         # Return video-only latent (use LTX2CombineAVLatent to recombine with audio if needed)
         return ({"samples": full_samples},)
@@ -529,14 +534,14 @@ class LTX2Patcher:
         if hasattr(model_obj, "diffusion_model"):
             diffusion_model = model_obj.diffusion_model
         else:
-            print(f"[LTX2Efficient] Warning: Could not find 'diffusion_model' in {type(model_obj)}.")
-            return
+            diffusion_model = model_obj # Fallback if no specific attribute
+            # print(f"[LTX2Efficient] Warning: Could not find 'diffusion_model' in {type(model_obj)}.")
 
         self.patched_count = 0
         self.attn1_count = 0
         self.attn2_count = 0
         
-        # LTX2-specific patching: look for attn1/attn2 modules
+        # 1. LTX2-specific patching: look for attn1/attn2 modules
         # IMPORTANT: Only patch the Attention module itself, NOT its sublayers (to_q, to_k, etc.)
         for name, module in diffusion_model.named_modules():
             # Must be an actual Attention class (not Linear, LayerNorm, etc.)
@@ -565,6 +570,46 @@ class LTX2Patcher:
                     print(f"[LTX2Efficient] Patched [{attn_type}]: {name}")
         
         print(f"[LTX2Efficient] Patched {self.patched_count} attention layers (attn1={self.attn1_count}, attn2={self.attn2_count})")
+
+        # 2. Patch Top-Level Forward (to fix missing attention_mask)
+        # Some LTX models (esp. GGUF loaded) require 'attention_mask' positional arg
+        if hasattr(diffusion_model, "forward"):
+             self._patch_model_forward(diffusion_model)
+
+    def _patch_model_forward(self, model):
+        if model in self.original_forward_maps:
+            return
+            
+        original_forward = model.forward
+        self.original_forward_maps[model] = original_forward
+        
+        def patched_forward(*args, **kwargs):
+            # Check if attention_mask is missing from kwargs
+            if "attention_mask" not in kwargs:
+                # print("[LTX2Patcher] Injecting missing attention_mask=None")
+                kwargs["attention_mask"] = None
+            
+            # Check for context dimension mismatch (common with Dual Text Encoders/GGUF)
+            # LTX usually expects 4096 (T5-XXL).
+            # If input is 7680 (likely Gemma/CLIP + T5), we need to slice it.
+            if "context" in kwargs:
+                context = kwargs["context"]
+                if hasattr(context, "shape") and len(context.shape) >= 3:
+                     dim = context.shape[-1]
+                     if dim == 7680:
+                         print(f"[LTX2Patcher] ⚠️ Detected context with dimension {dim}. LTX model expects 4096.")
+                         print(f"[LTX2Patcher] -> Slicing global T5 embedding (last 4096 channels)...")
+                         # Assuming T5 (4096) is the standard and often last in stack (e.g. if concatenated)
+                         # 7680 = 3584 (Gemma/Other) + 4096 (T5).
+                         kwargs["context"] = context[..., -4096:]
+                     elif dim > 4096 and dim != 4096:
+                         # Fallback warning for other mis-matches
+                         print(f"[LTX2Patcher] ⚠️ Warning: Context dimension {dim} > 4096. Model might crash if it expects only T5 (4096).")
+            
+            return original_forward(*args, **kwargs)
+            
+        model.forward = patched_forward
+        print("[LTX2Patcher] Patched top-level model forward to inject 'attention_mask'")
 
     def _patch_module(self, module, attn_type, module_path):
         if module in self.original_forward_maps:
