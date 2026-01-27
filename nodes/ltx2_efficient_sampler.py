@@ -1,6 +1,9 @@
 import torch
+import math
 import comfy.samplers
 import comfy.sample
+import comfy.model_management
+import node_helpers
 import nodes
 from .interpolation import interpolate
 from .gpu_monitor import get_gpu_monitor, PYNVML_AVAILABLE
@@ -75,12 +78,11 @@ class LTX2EfficientSampler:
                 "steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
                 "cfg": ("FLOAT", {"default": 4.0, "min": 0.0, "max": 100.0}),
                 "sampler_name": (comfy.samplers.KSampler.SAMPLERS, ),
-                # FlowMatch schedulers recommended for LTX
-                "scheduler": (comfy.samplers.KSampler.SCHEDULERS, {"default": "simple", "tooltip": "Use 'simple' or 'sgm_uniform' for LTX (FlowMatch)"}),
                 "denoise": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
+                # Optimization settings (kept in original order for backward compatibility)
                 "optimization_preset": (list(OPTIMIZATION_PRESETS.keys()), {"default": "Thermal Auto-Scale"}),
                 "target_temp": ("INT", {"default": 70, "min": 50, "max": 85, "step": 1}),
-                "frame_stride": ("INT", {"default": 4, "min": 1, "max": 32}),
+                "frame_stride": ("INT", {"default": 1, "min": 1, "max": 32, "tooltip": "Use 1 for best quality"}),
                 "attention_window": ("INT", {"default": 4, "min": 1, "max": 32}),
                 "freeze_ratio": ("FLOAT", {"default": 0.3, "min": 0.0, "max": 1.0, "step": 0.05}),
                 "thermal_throttle": ("BOOLEAN", {"default": True}),
@@ -89,8 +91,21 @@ class LTX2EfficientSampler:
                 "optimization_engine": (get_engine_names(), {"default": "Adaptive Cache (2-4x speedup)", "tooltip": "Temporal attention optimization engine"}),
                 "engine_cache_ratio": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 1.0, "step": 0.1, "tooltip": "Fraction of later steps to cache (AdaCache)"}),
                 "engine_merge_ratio": ("FLOAT", {"default": 0.25, "min": 0.0, "max": 0.5, "step": 0.05, "tooltip": "Fraction of tokens to merge (TokenMerge)"}),
-                # Context handling for Dual CLIP
-                "context_slice_method": (["Keep First 4096 (T5)", "Keep Last 4096 (Gemma)", "Auto-detect"], {"default": "Keep First 4096 (T5)", "tooltip": "How to slice 7680-dim context from dual CLIP"}),
+                # Context handling for Dual CLIP (Gemma + LTX Connector)
+                "context_slice_method": ([
+                    "Keep Last 4096 (Slot 2 - LTX Connector)", 
+                    "Keep First 4096 (Slot 1 - T5)", 
+                    "Auto-detect"
+                ], {"default": "Keep Last 4096 (Slot 2 - LTX Connector)", "tooltip": "For Gemma+LTX Connector: use Last 4096. For T5+Gemma: use First 4096."}),
+            },
+            "optional": {
+                # LTXVScheduler parameters (FlowMatch) - optional for backward compatibility
+                "sigmas": ("SIGMAS", {"tooltip": "Connect LTXVScheduler output here to override internal scheduler"}),
+                "max_shift": ("FLOAT", {"default": 2.05, "min": 0.0, "max": 100.0, "step": 0.01, "tooltip": "FlowMatch max shift (same as LTXVScheduler)"}),
+                "base_shift": ("FLOAT", {"default": 0.95, "min": 0.0, "max": 100.0, "step": 0.01, "tooltip": "FlowMatch base shift (same as LTXVScheduler)"}),
+                "terminal": ("FLOAT", {"default": 0.1, "min": 0.0, "max": 0.99, "step": 0.01, "tooltip": "Sigma terminal value after stretching"}),
+                "stretch": ("BOOLEAN", {"default": True, "tooltip": "Stretch sigmas to [terminal, 1] range"}),
+                "frame_rate": ("FLOAT", {"default": 25.0, "min": 0.0, "max": 1000.0, "step": 0.01, "tooltip": "Frame rate for conditioning (same as LTXVConditioning)"}),
             }
         }
 
@@ -99,65 +114,113 @@ class LTX2EfficientSampler:
     CATEGORY = "video/ltx2"
     
     @classmethod
-    def IS_CHANGED(cls, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method, optimization_engine, engine_cache_ratio, engine_merge_ratio, context_slice_method="Keep First 4096 (T5)"):
+    def IS_CHANGED(cls, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, denoise, 
+                   optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, 
+                   thermal_throttle, interpolation_method, optimization_engine, engine_cache_ratio, 
+                   engine_merge_ratio, context_slice_method="Keep Last 4096 (Slot 2 - LTX Connector)",
+                   sigmas=None, max_shift=2.05, base_shift=0.95, terminal=0.1, stretch=True, frame_rate=25.0):
         """
         ComfyUI caching mechanism.
         Returns a unique value when output would change.
-        Same value = use cached output, Different value = re-execute.
-        
-        For complex inputs (model, latent, conditioning), we use their id() 
-        which changes when the object changes.
         """
         import hashlib
         
-        # Include ALL inputs that affect the output
-        # For complex objects, use id() which is unique per object instance
         fingerprint_parts = [
-            # Complex objects - use object identity
             str(id(model)),
             str(id(latent_video)),
             str(id(positive)),
             str(id(negative)),
-            # Primitive values that affect output
             str(seed),
             str(steps),
             str(cfg),
             str(sampler_name),
-            str(scheduler),
             str(denoise),
+            str(max_shift),
+            str(base_shift),
+            str(terminal),
+            str(stretch),
+            str(frame_rate),
             str(optimization_preset),
             str(frame_stride),
             str(attention_window),
             str(freeze_ratio),
             str(interpolation_method),
-            # Engine settings (affect attention computation)
             str(optimization_engine),
             str(engine_cache_ratio),
             str(engine_merge_ratio),
-            # Context slicing affects output
             str(context_slice_method),
-            # Excluded: target_temp, thermal_throttle (only affect speed, not output)
+            str(id(sigmas)) if sigmas is not None else "none",
         ]
         
         fingerprint = "_".join(fingerprint_parts)
         return hashlib.md5(fingerprint.encode()).hexdigest()
+    
+    def _generate_ltx_sigmas(self, steps, latent_shape, max_shift=2.05, base_shift=0.95, terminal=0.1, stretch=True):
+        """
+        Generate LTX-compatible sigmas using FlowMatch formula.
+        This replicates LTXVScheduler from ComfyUI's nodes_lt.py
+        """
+        # Calculate token count from latent shape (B, C, F, H, W)
+        if len(latent_shape) == 5:
+            tokens = latent_shape[2] * latent_shape[3] * latent_shape[4]  # F * H * W
+        elif len(latent_shape) == 4:
+            tokens = latent_shape[0] * latent_shape[2] * latent_shape[3]  # F * H * W
+        else:
+            tokens = 4096  # Default fallback
+        
+        # Generate linear sigmas
+        sigmas = torch.linspace(1.0, 0.0, steps + 1)
+        
+        # Calculate sigma shift based on token count (same formula as LTXVScheduler)
+        x1 = 1024
+        x2 = 4096
+        mm = (max_shift - base_shift) / (x2 - x1)
+        b = base_shift - mm * x1
+        sigma_shift = tokens * mm + b
+        
+        # Apply FlowMatch formula
+        power = 1
+        sigmas = torch.where(
+            sigmas != 0,
+            math.exp(sigma_shift) / (math.exp(sigma_shift) + (1 / sigmas - 1) ** power),
+            0,
+        )
+        
+        # Stretch sigmas so that its final value matches the given terminal value
+        if stretch:
+            non_zero_mask = sigmas != 0
+            non_zero_sigmas = sigmas[non_zero_mask]
+            one_minus_z = 1.0 - non_zero_sigmas
+            scale_factor = one_minus_z[-1] / (1.0 - terminal)
+            stretched = 1.0 - (one_minus_z / scale_factor)
+            sigmas[non_zero_mask] = stretched
+        
+        return sigmas
 
-    def sample(self, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, scheduler, denoise, optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, thermal_throttle, interpolation_method, optimization_engine, engine_cache_ratio, engine_merge_ratio, context_slice_method="Keep First 4096 (T5)"):
+    def sample(self, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, denoise,
+               optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, 
+               thermal_throttle, interpolation_method, optimization_engine, engine_cache_ratio, 
+               engine_merge_ratio, context_slice_method="Keep Last 4096 (Slot 2 - LTX Connector)",
+               sigmas=None, max_shift=2.05, base_shift=0.95, terminal=0.1, stretch=True, frame_rate=25.0):
         import time
         
-        # SCHEDULER VALIDATION: LTX is FlowMatch, not Diffusion
-        incompatible_schedulers = ["normal", "karras", "exponential", "ddim_uniform", "beta"]
-        if scheduler in incompatible_schedulers:
-            print(f"")
-            print(f"[LTX2Efficient] " + "="*60)
-            print(f"[LTX2Efficient] ⚠️  SCHEDULER WARNING: '{scheduler}' IS INCOMPATIBLE!")
-            print(f"[LTX2Efficient] " + "="*60)
-            print(f"[LTX2Efficient] LTX Video uses FlowMatch, not Diffusion.")
-            print(f"[LTX2Efficient] Using '{scheduler}' will produce PURE NOISE.")
-            print(f"[LTX2Efficient] ")
-            print(f"[LTX2Efficient] ✓ Recommended schedulers: 'simple', 'sgm_uniform'")
-            print(f"[LTX2Efficient] " + "="*60)
-            print(f"")
+        # Generate or use provided sigmas
+        latent_shape = latent_video["samples"].shape
+        if sigmas is not None:
+            # Use externally provided sigmas (from LTXVScheduler)
+            print(f"[LTX2Efficient] Using external sigmas (e.g., from LTXVScheduler)")
+            print(f"[LTX2Efficient] Sigma range: {sigmas[0]:.4f} -> {sigmas[-1]:.4f}, steps: {len(sigmas)-1}")
+            use_sigmas = sigmas
+        else:
+            # Generate LTX-compatible sigmas internally
+            print(f"[LTX2Efficient] Generating LTX FlowMatch sigmas (max_shift={max_shift}, base_shift={base_shift}, terminal={terminal})")
+            use_sigmas = self._generate_ltx_sigmas(steps, latent_shape, max_shift, base_shift, terminal, stretch)
+            print(f"[LTX2Efficient] Generated sigmas: {use_sigmas[0]:.4f} -> {use_sigmas[len(use_sigmas)-2]:.4f} -> {use_sigmas[-1]:.4f}")
+        
+        # Inject frame_rate into conditioning (same as LTXVConditioning node)
+        positive = node_helpers.conditioning_set_values(positive, {"frame_rate": frame_rate})
+        negative = node_helpers.conditioning_set_values(negative, {"frame_rate": frame_rate})
+        print(f"[LTX2Efficient] Set frame_rate={frame_rate} in conditioning")
         
         # Store context slice method for patcher
         self._context_slice_method = context_slice_method
@@ -433,40 +496,59 @@ class LTX2EfficientSampler:
                     engine.step_end(step, x)
             
             # 3. Run Sampler
-            # nodes.common_ksampler doesn't support callback, so we use comfy.sample.sample directly
+            # Use KSampler with explicit sigmas for LTX FlowMatch compatibility
+            # This matches how SamplerCustomAdvanced operates with LTXVScheduler
             
             # Unwrap latent dictionary to get the tensor
             kf_samples = kf_latent["samples"]
-            current_frames = kf_samples.shape[0]
+            current_frames = kf_samples.shape[0] if len(kf_samples.shape) == 4 else kf_samples.shape[2]
             print(f"[LTX2Efficient] Sampling on reduced frames: {kf_samples.shape} (Stride={frame_stride})")
             
             # Update patcher with frame info for heuristics
             patcher.set_frame_info(current_frames)
             
-            # Prepare noise
-            # comfy.sample.prepare_noise expects a Tensor (latent_image), not a dict
+            # Prepare noise - comfy.sample.prepare_noise expects a Tensor (latent_image), not a dict
             noise = comfy.sample.prepare_noise(kf_samples, seed)
             
-            # Run sampling
-            # comfy.sample.sample also expects the latent Tensor as 'latent_image'
-            # NOTE: Scheduler validation is done at the start of sample()
-
-            result_tensor = comfy.sample.sample(
-                model, noise, steps, cfg, sampler_name, scheduler, 
-                positive, negative, kf_samples, 
-                denoise=denoise, 
-                disable_noise=False, 
-                start_step=None, 
-                last_step=None, 
-                force_full_denoise=False, 
-                noise_mask=None, 
-                callback=step_callback, 
-                disable_pbar=False, 
+            # Create sampler and get sigmas
+            sampler = comfy.samplers.KSampler(
+                model, 
+                steps=steps,
+                device=comfy.model_management.get_torch_device(),
+                sampler=sampler_name,
+                scheduler="simple",  # This is overridden by explicit sigmas
+                denoise=denoise,
+                model_options=model.model_options
+            )
+            
+            # Use our FlowMatch sigmas directly
+            # Truncate sigmas for denoise < 1.0
+            if denoise < 1.0:
+                total_steps = len(use_sigmas) - 1
+                start_step = int(total_steps * (1 - denoise))
+                use_sigmas = use_sigmas[start_step:]
+            
+            # Run the sampling with explicit sigmas (like SamplerCustomAdvanced)
+            print(f"[LTX2Efficient] Running sampling with {len(use_sigmas)-1} steps, sigmas[0]={use_sigmas[0]:.4f}")
+            
+            # Sample using the sampler's internal sample method with our sigmas
+            result_tensor = sampler.sample(
+                noise,
+                positive, 
+                negative, 
+                cfg=cfg,
+                latent_image=kf_samples,
+                start_step=0,
+                last_step=len(use_sigmas)-1,
+                force_full_denoise=False,
+                denoise_mask=None,
+                sigmas=use_sigmas,
+                callback=step_callback,
+                disable_pbar=False,
                 seed=seed
             )
             
-            # comfy.sample.sample returns a Tensor
-            # We wrap it back into a dictionary for the rest of our logic
+            # sample() returns a Tensor; wrap it back into a dictionary for the rest of our logic
             result = {"samples": result_tensor}
             
         finally:
@@ -613,43 +695,54 @@ class LTX2Patcher:
                 kwargs["attention_mask"] = None
             
             # Check for context dimension mismatch (common with Dual Text Encoders/GGUF)
-            # LTX usually expects 4096 (T5-XXL).
-            # If input is 7680 (likely Gemma/CLIP + T5), we need to slice it.
+            # LTX expects 4096 dimensions.
+            # If input is 7680 (Gemma 3584 + LTX Connector 4096), we need to slice it.
             if "context" in kwargs:
                 context = kwargs["context"]
                 if hasattr(context, "shape") and len(context.shape) >= 3:
                     dim = context.shape[-1]
                     if dim == 7680:
                         # Get slice method from sampler instance if available
-                        slice_method = getattr(self, '_context_slice_method', 'Keep First 4096 (T5)')
+                        slice_method = getattr(self, '_context_slice_method', 'Keep Last 4096 (Slot 2 - LTX Connector)')
                         
-                        if slice_method == "Keep Last 4096 (Gemma)":
+                        if "Last 4096" in slice_method or "Slot 2" in slice_method:
+                            # Default for Gemma + LTX Connector: use slot 2 (last 4096)
                             kwargs["context"] = context[..., -4096:]
                             if not getattr(self, '_context_logged', False):
-                                print(f"[LTX2Patcher] Sliced context 7680->4096 (Last 4096 / Gemma)")
+                                print(f"[LTX2Patcher] Sliced context 7680->4096 (Last 4096 / LTX Connector Slot 2)")
                                 self._context_logged = True
                         elif slice_method == "Auto-detect":
-                            # Auto-detect: T5 typically has different variance
+                            # Auto-detect: Check which slot has LTX-compatible embeddings
+                            # Gemma (first 3584) typically has different variance pattern
                             first_var = context[..., :4096].var().item()
                             last_var = context[..., -4096:].var().item()
-                            if first_var < last_var:
-                                kwargs["context"] = context[..., :4096]
-                                if not getattr(self, '_context_logged', False):
-                                    print(f"[LTX2Patcher] Auto-detected T5 in first 4096 (var={first_var:.4f} < {last_var:.4f})")
-                                    self._context_logged = True
-                            else:
+                            gemma_var = context[..., :3584].var().item()
+                            
+                            # If first 3584 (Gemma portion) has very different variance, Gemma is in slot 1
+                            # So LTX Connector is in slot 2
+                            if abs(gemma_var - first_var) > 0.05:
                                 kwargs["context"] = context[..., -4096:]
                                 if not getattr(self, '_context_logged', False):
-                                    print(f"[LTX2Patcher] Auto-detected T5 in last 4096 (var={last_var:.4f} < {first_var:.4f})")
+                                    print(f"[LTX2Patcher] Auto-detected LTX in Slot 2 (last 4096)")
+                                    self._context_logged = True
+                            elif last_var < first_var:
+                                kwargs["context"] = context[..., -4096:]
+                                if not getattr(self, '_context_logged', False):
+                                    print(f"[LTX2Patcher] Auto-detected LTX in Slot 2 (var={last_var:.4f} < {first_var:.4f})")
+                                    self._context_logged = True
+                            else:
+                                kwargs["context"] = context[..., :4096]
+                                if not getattr(self, '_context_logged', False):
+                                    print(f"[LTX2Patcher] Auto-detected LTX in Slot 1 (var={first_var:.4f} < {last_var:.4f})")
                                     self._context_logged = True
                         else:
-                            # Default: Keep First 4096 (T5)
+                            # Keep First 4096 (Slot 1 - T5)
                             kwargs["context"] = context[..., :4096]
                             if not getattr(self, '_context_logged', False):
-                                print(f"[LTX2Patcher] Sliced context 7680->4096 (First 4096 / T5)")
+                                print(f"[LTX2Patcher] Sliced context 7680->4096 (First 4096 / T5 Slot 1)")
                                 self._context_logged = True
                     elif dim > 4096 and dim != 4096:
-                        print(f"[LTX2Patcher] ⚠️ Warning: Context dimension {dim} > 4096. Model might crash if it expects only T5 (4096).")
+                        print(f"[LTX2Patcher] ⚠️ Warning: Context dimension {dim} > 4096. Model might crash if it expects only 4096.")
             
             return original_forward(*args, **kwargs)
             
