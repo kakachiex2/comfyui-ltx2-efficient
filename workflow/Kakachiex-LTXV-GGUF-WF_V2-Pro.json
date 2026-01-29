@@ -8,8 +8,8 @@
       "id": 98,
       "type": "LoadImage",
       "pos": [
-        -90.50827705376673,
-        4645.280110787617
+        -90.50860435326126,
+        4645.279119252597
       ],
       "size": [
         777.265625,
@@ -61,12 +61,12 @@
       "id": 102,
       "type": "ResizeImageMaskNode",
       "pos": [
-        340.39450072401087,
-        5267.413357315394
+        340.3941608255268,
+        5267.413145583714
       ],
       "size": [
         341.25,
-        215.96875
+        154
       ],
       "flags": {},
       "order": 4,
@@ -116,8 +116,8 @@
       "id": 104,
       "type": "MarkdownNote",
       "pos": [
-        -704.4493849096696,
-        5892.320583877894
+        -704.4495355917113,
+        5892.320061284676
       ],
       "size": [
         456,
@@ -148,12 +148,12 @@
       "id": 75,
       "type": "SaveVideo",
       "pos": [
-        1286.5145636580387,
-        4645.401638565394
+        1286.5139818404273,
+        4645.40140356264
       ],
       "size": [
         1524,
-        1163.3125
+        1043.3125
       ],
       "flags": {
         "collapsed": false
@@ -195,8 +195,8 @@
       "id": 103,
       "type": "MarkdownNote",
       "pos": [
-        -706.0003560468224,
-        4597.994412002894
+        -706.0006472168612,
+        4597.993999910225
       ],
       "size": [
         576,
@@ -225,8 +225,8 @@
       "id": 94,
       "type": "MarkdownNote",
       "pos": [
-        969.5269877031778,
-        4462.014323027201
+        969.5263699969742,
+        4462.013476584368
       ],
       "size": [
         252,
@@ -255,8 +255,8 @@
       "id": 92,
       "type": "b7c2d337-c38d-4c04-922b-2d638449d13e",
       "pos": [
-        742.9631313663722,
-        4645.280110787617
+        742.962817610791,
+        4645.279119252597
       ],
       "size": [
         503.859375,
@@ -284,9 +284,6 @@
           "label": "prompt",
           "name": "text",
           "type": "STRING",
-          "widget": {
-            "name": "text"
-          },
           "link": null
         }
       ],
@@ -304,10 +301,6 @@
           [
             "-1",
             "unet_name"
-          ],
-          [
-            "-1",
-            "text"
           ],
           [
             "-1",
@@ -337,8 +330,7 @@
       },
       "widgets_values": [
         "LTX2 GGUF\\ltx-2-19b-dev_Q4_K_M.gguf",
-        "🐆 Snow Leopard\n\nEstilo vocal: Flow frío, preciso, mid-tempo (90–100 BPM), voz calmada pero filosa, acentos limpios\n\nSnow Leopard:\nYo—\nFrío en la voz, mira el hielo al hablar,\nmanchas que brillan, elegancia animal.\nEntro sin ruido, sombra letal,\nun susurro mío y tu ritmo se va.\n\n🐯 Tiger\n\nEstilo vocal: Flow agresivo, bounce marcado, slightly faster (100–105 BPM), voz grave con actitud\n\nTiger:\nGrr—\nSiente el rugido, calor tropical,\nrayas que queman, puro poder natural.\nFlores en la mano, fuego verbal,\nyo florezco en el micro, tú te vas atrás.\n\n🐆 Snow Leopard\n\nEstilo vocal: Flow cortado, pausas dramáticas, énfasis en consonantes\n\nSnow Leopard:\nFreeze—\nCongelo el frame, la clase ganó,\nmente afilada, más filo que tu voz.\n\n🐯 Tiger\n\nEstilo vocal: Final hype, crowd-control, voz abierta, cierre épico\n\nTiger:\nÚltimo rugido—\ntiembla el lugar,\nrey del escenario,\n¡la jungla es mi hogar!",
-        25,
+        65,
         1
       ]
     }
@@ -390,10 +382,10 @@
         "id": "b7c2d337-c38d-4c04-922b-2d638449d13e",
         "version": 1,
         "state": {
-          "lastGroupId": 19,
-          "lastNodeId": 236,
-          "lastLinkId": 908,
-          "lastRerouteId": 32
+          "lastGroupId": 20,
+          "lastNodeId": 238,
+          "lastLinkId": 936,
+          "lastRerouteId": 33
         },
         "revision": 0,
         "config": {},
@@ -410,7 +402,7 @@
         "outputNode": {
           "id": -20,
           "bounding": [
-            4029.2650127284346,
+            3636.0148414576347,
             4705.936899820005,
             120,
             60
@@ -448,7 +440,7 @@
             "name": "text",
             "type": "STRING",
             "linkIds": [
-              872
+              934
             ],
             "label": "prompt",
             "pos": [
@@ -461,7 +453,8 @@
             "name": "frames_number",
             "type": "INT",
             "linkIds": [
-              519
+              519,
+              909
             ],
             "pos": [
               -1942.9636972621606,
@@ -491,7 +484,7 @@
             ],
             "localized_name": "VIDEO",
             "pos": [
-              4049.2650127284346,
+              3656.0148414576347,
               4725.936899820005
             ]
           }
@@ -502,8 +495,8 @@
             "id": 120,
             "type": "VAELoaderKJ",
             "pos": [
-              -290.8189867270268,
-              4812.90081269944
+              -290.81905138272487,
+              4812.899808912236
             ],
             "size": [
               506.390625,
@@ -541,17 +534,17 @@
             "id": 122,
             "type": "ConditioningZeroOut",
             "pos": [
-              477.5468925244717,
-              5133.042167655248
+              477.54679334383627,
+              5133.040271151819
             ],
             "size": [
               225,
-              26
+              8
             ],
             "flags": {
               "collapsed": true
             },
-            "order": 15,
+            "order": 13,
             "mode": 0,
             "inputs": [
               {
@@ -567,7 +560,7 @@
                 "name": "CONDITIONING",
                 "type": "CONDITIONING",
                 "links": [
-                  323
+                  924
                 ]
               }
             ],
@@ -594,15 +587,15 @@
             "id": 123,
             "type": "LTXVConditioning",
             "pos": [
-              767.4513077706836,
-              4455.828132775198
+              767.4506833177938,
+              4455.82710925946
             ],
             "size": [
               324,
               104
             ],
             "flags": {},
-            "order": 1,
+            "order": 14,
             "mode": 0,
             "inputs": [
               {
@@ -615,7 +608,7 @@
                 "localized_name": "negative",
                 "name": "negative",
                 "type": "CONDITIONING",
-                "link": null
+                "link": 924
               }
             ],
             "outputs": [
@@ -663,17 +656,17 @@
             "id": 126,
             "type": "Anything Everywhere",
             "pos": [
-              387.56436460859425,
-              5194.2677042714095
+              376.52547172925324,
+              4629.917983825431
             ],
             "size": [
               328.109375,
-              46
+              8
             ],
             "flags": {
               "collapsed": true
             },
-            "order": 16,
+            "order": 15,
             "mode": 0,
             "inputs": [
               {
@@ -683,11 +676,11 @@
                 "name": "anything",
                 "shape": 7,
                 "type": "CONDITIONING",
-                "link": 323
+                "link": 926
               },
               {
                 "label": "anything",
-                "name": "anything11",
+                "name": "anything12",
                 "type": "*",
                 "link": null
               }
@@ -709,7 +702,7 @@
                 "group_regex_invert": false,
                 "repeated_type_rule": 0,
                 "string_to_combo": 0,
-                "next_input_index": 11
+                "next_input_index": 12
               }
             },
             "widgets_values": []
@@ -718,17 +711,17 @@
             "id": 128,
             "type": "Anything Everywhere",
             "pos": [
-              -107.87070662374812,
-              4723.756932491106
+              -107.87154161710032,
+              4723.755765943487
             ],
             "size": [
               328.109375,
-              66
+              8
             ],
             "flags": {
               "collapsed": true
             },
-            "order": 10,
+            "order": 8,
             "mode": 0,
             "inputs": [
               {
@@ -771,15 +764,15 @@
             "id": 130,
             "type": "GetImageSize",
             "pos": [
-              -1776.4726732504625,
-              4399.657046916613
+              -1776.4735788349794,
+              4399.656509216056
             ],
             "size": [
               225,
               96
             ],
             "flags": {},
-            "order": 17,
+            "order": 16,
             "mode": 0,
             "inputs": [
               {
@@ -836,8 +829,8 @@
             "id": 131,
             "type": "EmptyImage",
             "pos": [
-              -1459.150525996675,
-              4370.893335584542
+              -1459.1508520554662,
+              4370.892511820223
             ],
             "size": [
               324,
@@ -846,7 +839,7 @@
             "flags": {
               "collapsed": false
             },
-            "order": 18,
+            "order": 17,
             "mode": 0,
             "inputs": [
               {
@@ -906,15 +899,15 @@
             "id": 132,
             "type": "ImageScaleBy",
             "pos": [
-              -1459.150525996675,
-              4616.042088741107
+              -1459.1508520554662,
+              4616.040867940015
             ],
             "size": [
               324,
               114.65625
             ],
             "flags": {},
-            "order": 19,
+            "order": 18,
             "mode": 0,
             "inputs": [
               {
@@ -960,15 +953,15 @@
             "id": 133,
             "type": "GetImageSize",
             "pos": [
-              -1459.150525996675,
-              4813.26579060348
+              -1459.1508520554662,
+              4813.265043287236
             ],
             "size": [
               324,
               96
             ],
             "flags": {},
-            "order": 20,
+            "order": 19,
             "mode": 0,
             "inputs": [
               {
@@ -1025,17 +1018,27 @@
             "id": 134,
             "type": "PrimitiveInt",
             "pos": [
-              -1062.8128203266945,
-              4606.265613046662
+              -1062.8130699374112,
+              4606.26488052682
             ],
             "size": [
               324,
-              82
+              80
             ],
             "flags": {},
-            "order": 2,
+            "order": 20,
             "mode": 0,
-            "inputs": [],
+            "inputs": [
+              {
+                "localized_name": "value",
+                "name": "value",
+                "type": "INT",
+                "widget": {
+                  "name": "value"
+                },
+                "link": 909
+              }
+            ],
             "outputs": [
               {
                 "localized_name": "INT",
@@ -1065,7 +1068,7 @@
               "ver": "0.7.0"
             },
             "widgets_values": [
-              25,
+              65,
               "fixed"
             ]
           },
@@ -1073,8 +1076,8 @@
             "id": 135,
             "type": "EmptyLTXVLatentVideo",
             "pos": [
-              -1060.2236966682349,
-              4369.126152030249
+              -1060.2236059617167,
+              4369.125421976473
             ],
             "size": [
               324,
@@ -1142,7 +1145,7 @@
             "widgets_values": [
               768,
               512,
-              25,
+              65,
               1
             ]
           },
@@ -1150,8 +1153,8 @@
             "id": 136,
             "type": "LTXVEmptyLatentAudio",
             "pos": [
-              -1058.0641618670984,
-              4761.192814751208
+              -1062.776367463453,
+              4761.192289380987
             ],
             "size": [
               315.71875,
@@ -1205,7 +1208,7 @@
               "ver": "0.3.68"
             },
             "widgets_values": [
-              25,
+              65,
               24,
               1
             ]
@@ -1214,8 +1217,8 @@
             "id": 137,
             "type": "LTXVImgToVideoInplace",
             "pos": [
-              -683.6902962578818,
-              4372.141658659037
+              -683.6908368644952,
+              4372.140992723002
             ],
             "size": [
               324,
@@ -1280,8 +1283,8 @@
             "id": 138,
             "type": "LTXVConcatAVLatent",
             "pos": [
-              -676.8731625181406,
-              4736.914385931764
+              -676.8738745164048,
+              4736.914348842793
             ],
             "size": [
               293.40625,
@@ -1338,12 +1341,12 @@
             "id": 140,
             "type": "Reroute",
             "pos": [
-              -1330.8519148855642,
-              4961.721539498682
+              -1330.852430831508,
+              4961.719985778556
             ],
             "size": [
-              75,
-              26
+              225,
+              12
             ],
             "flags": {},
             "order": 25,
@@ -1381,17 +1384,17 @@
             "id": 142,
             "type": "Anything Everywhere",
             "pos": [
-              -107.8478261466135,
-              5022.754722895147
+              -107.84826687751683,
+              5022.754708000778
             ],
             "size": [
               328.109375,
-              66
+              8
             ],
             "flags": {
               "collapsed": true
             },
-            "order": 8,
+            "order": 6,
             "mode": 0,
             "inputs": [
               {
@@ -1434,15 +1437,15 @@
             "id": 143,
             "type": "VAELoader",
             "pos": [
-              -290.8189867270268,
-              5100.730279239844
+              -290.81905138272487,
+              5100.730755092792
             ],
             "size": [
               464.421875,
               82.65625
             ],
             "flags": {},
-            "order": 3,
+            "order": 1,
             "mode": 0,
             "inputs": [],
             "outputs": [
@@ -1455,7 +1458,7 @@
                   540,
                   541,
                   542,
-                  900
+                  927
                 ]
               }
             ],
@@ -1475,8 +1478,8 @@
             "id": 146,
             "type": "LTXVPreprocess",
             "pos": [
-              -1020.440796869466,
-              5213.9839092903485
+              -1020.441406525953,
+              5213.983250752513
             ],
             "size": [
               298.90625,
@@ -1529,8 +1532,8 @@
             "id": 147,
             "type": "ResizeImagesByLongerEdge",
             "pos": [
-              -1777.7296275591748,
-              5213.9839092903485
+              -1777.7296687872363,
+              5213.983250752513
             ],
             "size": [
               364.328125,
@@ -1584,15 +1587,15 @@
             "id": 160,
             "type": "LatentUpscaleModelLoader",
             "pos": [
-              1495.8089811845084,
-              4798.278515508783
+              1495.808593474043,
+              4798.277304571959
             ],
             "size": [
               432.109375,
               82.65625
             ],
             "flags": {},
-            "order": 4,
+            "order": 2,
             "mode": 0,
             "inputs": [],
             "outputs": [
@@ -1637,8 +1640,8 @@
             "id": 169,
             "type": "LTXVLatentUpsampler",
             "pos": [
-              1972.0942952627906,
-              4774.057792655248
+              1972.0945092726529,
+              4774.056954094528
             ],
             "size": [
               282.234375,
@@ -1701,8 +1704,8 @@
             "id": 170,
             "type": "LTXVCropGuides",
             "pos": [
-              1968.9646097356444,
-              4594.776700483531
+              1968.9652503750835,
+              4594.77611099557
             ],
             "size": [
               288,
@@ -1781,8 +1784,8 @@
             "id": 171,
             "type": "LTXVImgToVideoInplace",
             "pos": [
-              1970.3949285487756,
-              4942.3500906350455
+              1970.3951548889722,
+              4942.349434563278
             ],
             "size": [
               281.796875,
@@ -1847,8 +1850,8 @@
             "id": 172,
             "type": "LTXVConcatAVLatent",
             "pos": [
-              1974.5463056005433,
-              5170.847466739844
+              1974.5458167813335,
+              5170.845609693486
             ],
             "size": [
               277.09375,
@@ -1904,8 +1907,8 @@
             "id": 173,
             "type": "LoraLoaderModelOnly",
             "pos": [
-              1246.0775358720086,
-              4078.1973325858044
+              1534.9662540643203,
+              4078.195951490363
             ],
             "size": [
               624,
@@ -1915,7 +1918,7 @@
               "collapsed": false
             },
             "order": 32,
-            "mode": 0,
+            "mode": 4,
             "inputs": [
               {
                 "localized_name": "model",
@@ -1967,8 +1970,8 @@
             "id": 178,
             "type": "LTXVSeparateAVLatent",
             "pos": [
-              2717.14983108981,
-              4547.441039183026
+              2717.149359533069,
+              4547.439468200431
             ],
             "size": [
               231.9375,
@@ -2026,14 +2029,16 @@
             "id": 179,
             "type": "VAEDecode",
             "pos": [
-              3148.660987576552,
-              4547.713292970905
+              3148.659450678901,
+              4547.713393981681
             ],
             "size": [
               288,
               72
             ],
-            "flags": {},
+            "flags": {
+              "collapsed": false
+            },
             "order": 34,
             "mode": 0,
             "inputs": [
@@ -2083,8 +2088,8 @@
             "id": 180,
             "type": "LTXVAudioVAEDecode",
             "pos": [
-              3152.273529006476,
-              4886.651503198177
+              3152.2730031962624,
+              4886.650297193486
             ],
             "size": [
               288,
@@ -2141,8 +2146,8 @@
             "id": 181,
             "type": "CreateVideo",
             "pos": [
-              3152.570690070239,
-              4702.625205060551
+              3152.571397293484,
+              4702.622899190014
             ],
             "size": [
               324,
@@ -2201,8 +2206,8 @@
             "id": 183,
             "type": "LTXVSeparateAVLatent",
             "pos": [
-              1517.468693542463,
-              4407.461162289087
+              1517.4687225973066,
+              4407.459813252515
             ],
             "size": [
               288,
@@ -2260,15 +2265,15 @@
             "id": 198,
             "type": "Reroute",
             "pos": [
-              -677.1274756691823,
-              4319.679537446916
+              -677.1278078931409,
+              4319.678536125779
             ],
             "size": [
-              75,
-              26
+              225,
+              12
             ],
             "flags": {},
-            "order": 9,
+            "order": 7,
             "mode": 0,
             "inputs": [
               {
@@ -2300,8 +2305,8 @@
             "id": 213,
             "type": "LTXVScheduler",
             "pos": [
-              774.569424977912,
-              4648.5221629204
+              774.5691729011273,
+              4648.521363816751
             ],
             "size": [
               307.25,
@@ -2349,15 +2354,15 @@
             "id": 214,
             "type": "ManualSigmas",
             "pos": [
-              1979.149712718599,
-              5294.0250432865605
+              1979.1497393073755,
+              5294.023886603209
             ],
             "size": [
               346.515625,
               84
             ],
             "flags": {},
-            "order": 5,
+            "order": 3,
             "mode": 0,
             "inputs": [],
             "outputs": [
@@ -2386,15 +2391,15 @@
             "id": 215,
             "type": "DualCLIPLoaderGGUF",
             "pos": [
-              -287.4150129067932,
-              4505.929241518885
+              -287.414971521614,
+              4505.929566941752
             ],
             "size": [
               511.75,
               151.96875
             ],
             "flags": {},
-            "order": 6,
+            "order": 4,
             "mode": 0,
             "inputs": [],
             "outputs": [
@@ -2425,8 +2430,8 @@
             "id": 216,
             "type": "VantageGGUFLoader",
             "pos": [
-              -283.99393074730773,
-              4375.928551020148
+              -283.99433078810716,
+              4375.928210604946
             ],
             "size": [
               507,
@@ -2473,8 +2478,8 @@
             "id": 228,
             "type": "LTX2EfficientSamplerPro",
             "pos": [
-              1179.3736315948624,
-              4408.401720212067
+              1179.3732907396684,
+              4408.400649841056
             ],
             "size": [
               299.453125,
@@ -2545,7 +2550,7 @@
               }
             },
             "widgets_values": [
-              88030165433206,
+              347228304566892,
               "randomize",
               20,
               4,
@@ -2557,9 +2562,9 @@
               true,
               "Keep Last 4096 (Slot 2 - LTX Connector)",
               8,
-              2.05,
-              0.95,
-              0.1,
+              0,
+              0,
+              0,
               true,
               25
             ]
@@ -2568,8 +2573,8 @@
             "id": 229,
             "type": "LTX2EfficientSamplerPro",
             "pos": [
-              2356.4909966516793,
-              4547.900220843379
+              2356.4908580139722,
+              4547.899890292445
             ],
             "size": [
               299.453125,
@@ -2653,8 +2658,8 @@
             "id": 230,
             "type": "LTX2TextEncodeOptimized",
             "pos": [
-              295.2899049238564,
-              4384.147952061814
+              295.2891707309891,
+              4384.147774407029
             ],
             "size": [
               418.203125,
@@ -2679,7 +2684,7 @@
                 "widget": {
                   "name": "text"
                 },
-                "link": 872
+                "link": 936
               }
             ],
             "outputs": [
@@ -2688,7 +2693,8 @@
                 "name": "CONDITIONING",
                 "type": "CONDITIONING",
                 "links": [
-                  873
+                  873,
+                  926
                 ]
               }
             ],
@@ -2710,15 +2716,15 @@
             "id": 231,
             "type": "LTXVSeparateAVLatent",
             "pos": [
-              1973.3744306005433,
-              5577.784019770146
+              93.79258869973955,
+              3677.5830771414053
             ],
             "size": [
               231.9375,
               72
             ],
             "flags": {},
-            "order": 7,
+            "order": 5,
             "mode": 0,
             "inputs": [
               {
@@ -2769,15 +2775,15 @@
             "id": 232,
             "type": "VAEDecode",
             "pos": [
-              2302.02593588779,
-              5577.948259826964
+              422.44384738029476,
+              3677.745701924391
             ],
             "size": [
               288,
               72
             ],
             "flags": {},
-            "order": 11,
+            "order": 9,
             "mode": 0,
             "inputs": [
               {
@@ -2790,7 +2796,7 @@
                 "localized_name": "vae",
                 "name": "vae",
                 "type": "VAE",
-                "link": 900
+                "link": 927
               }
             ],
             "outputs": [
@@ -2826,15 +2832,15 @@
             "id": 233,
             "type": "LTXVAudioVAEDecode",
             "pos": [
-              2305.975588665568,
-              5906.977813172924
+              426.3939884393226,
+              4006.777114684807
             ],
             "size": [
               288,
               72
             ],
             "flags": {},
-            "order": 12,
+            "order": 10,
             "mode": 0,
             "inputs": [
               {
@@ -2884,15 +2890,15 @@
             "id": 234,
             "type": "CreateVideo",
             "pos": [
-              2304.83478610875,
-              5722.199857838328
+              425.2535261997391,
+              3821.9977635563355
             ],
             "size": [
               324,
               104
             ],
             "flags": {},
-            "order": 13,
+            "order": 11,
             "mode": 0,
             "inputs": [
               {
@@ -2944,15 +2950,15 @@
             "id": 235,
             "type": "SaveVideo",
             "pos": [
-              2692.324428627689,
-              5721.3465986842875
+              786.5267195591136,
+              3680.4029013601553
             ],
             "size": [
               508.421875,
-              516.25
+              276.25
             ],
             "flags": {},
-            "order": 14,
+            "order": 12,
             "mode": 0,
             "inputs": [
               {
@@ -2981,12 +2987,12 @@
             "id": 236,
             "type": "Anything Everywhere",
             "pos": [
-              1188.9422178480188,
-              5128.014843633783
+              1188.943087831682,
+              5128.012927401819
             ],
             "size": [
               328.109375,
-              66
+              8
             ],
             "flags": {
               "collapsed": true
@@ -3029,6 +3035,86 @@
               }
             },
             "widgets_values": []
+          },
+          {
+            "id": 237,
+            "type": "Reroute",
+            "pos": [
+              -1827.9235842603266,
+              5531.627347974736
+            ],
+            "size": [
+              225,
+              12
+            ],
+            "flags": {},
+            "order": 44,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "",
+                "type": "*",
+                "link": 934
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "*",
+                "links": [
+                  935
+                ]
+              }
+            ],
+            "properties": {
+              "showOutputText": false,
+              "horizontal": false,
+              "ue_properties": {
+                "widget_ue_connectable": {},
+                "version": "7.5.2",
+                "input_ue_unconnectable": {}
+              }
+            }
+          },
+          {
+            "id": 238,
+            "type": "Reroute",
+            "pos": [
+              -14.75020372647532,
+              5531.626751186541
+            ],
+            "size": [
+              225,
+              12
+            ],
+            "flags": {},
+            "order": 45,
+            "mode": 0,
+            "inputs": [
+              {
+                "name": "",
+                "type": "*",
+                "link": 935
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "*",
+                "links": [
+                  936
+                ]
+              }
+            ],
+            "properties": {
+              "showOutputText": false,
+              "horizontal": false,
+              "ue_properties": {
+                "widget_ue_connectable": {},
+                "version": "7.5.2",
+                "input_ue_unconnectable": {}
+              }
+            }
           }
         ],
         "groups": [
@@ -3036,10 +3122,10 @@
             "id": 11,
             "title": ":: | Image Resize | Setting | ::",
             "bounding": [
-              -1787.7298396200179,
+              -1787.7294792361008,
               4253.056439921109,
-              5618.842431267377,
-              1157.6021896593952
+              5284.300950469683,
+              1167.6021896593952
             ],
             "color": "#3f789e",
             "font_size": 24,
@@ -3049,10 +3135,10 @@
             "id": 12,
             "title": ":: | GGUF Model Loader | ::",
             "bounding": [
-              -300.8187525524592,
-              4298.162480756219,
-              537.109375,
-              925.2209824881207
+              -300.8190117600683,
+              4302.32837264668,
+              535.1541694877624,
+              891.0585997473887
             ],
             "color": "#3f789e",
             "font_size": 24,
@@ -3075,10 +3161,10 @@
             "id": 14,
             "title": ":: | LTXV Render P-[1] | ::",
             "bounding": [
-              1167.8799298767074,
-              4333.175146940681,
-              770.0378761046586,
-              936.88125
+              1169.3735541303217,
+              4333.86018129059,
+              768.5445452393246,
+              904.2510503269247
             ],
             "color": "#3f789e",
             "font_size": 24,
@@ -3114,7 +3200,7 @@
             "id": 18,
             "title": "Group",
             "bounding": [
-              1236.0778581543304,
+              1524.966747043217,
               4004.597100613317,
               644,
               228.25625000000045
@@ -3127,10 +3213,23 @@
             "id": 19,
             "title": "Group",
             "bounding": [
-              1963.3744202837433,
-              5504.184339332645,
-              1247.3708267992906,
-              484.79308583780914
+              83.79248838006673,
+              3603.983806419722,
+              1221.1561020359818,
+              602.6697009154033
+            ],
+            "color": "#3f789e",
+            "font_size": 24,
+            "flags": {}
+          },
+          {
+            "id": 20,
+            "title": "Group",
+            "bounding": [
+              3138.660744595337,
+              4474.114102289759,
+              347.91072663824525,
+              494.53694918857457
             ],
             "color": "#3f789e",
             "font_size": 24,
@@ -3138,14 +3237,6 @@
           }
         ],
         "links": [
-          {
-            "id": 323,
-            "origin_id": 122,
-            "origin_slot": 0,
-            "target_id": 126,
-            "target_slot": 0,
-            "type": "CONDITIONING"
-          },
           {
             "id": 327,
             "origin_id": 130,
@@ -3585,14 +3676,6 @@
             "type": "LATENT"
           },
           {
-            "id": 872,
-            "origin_id": -10,
-            "origin_slot": 2,
-            "target_id": 230,
-            "target_slot": 1,
-            "type": "STRING"
-          },
-          {
             "id": 873,
             "origin_id": 230,
             "origin_slot": 0,
@@ -3641,29 +3724,78 @@
             "type": "VIDEO"
           },
           {
-            "id": 900,
-            "origin_id": 143,
-            "origin_slot": 0,
-            "target_id": 232,
-            "target_slot": 1,
-            "type": "VAE",
-            "parentId": 32
-          },
-          {
             "id": 901,
             "origin_id": 228,
             "origin_slot": 0,
             "target_id": 236,
             "target_slot": 0,
             "type": "LATENT"
+          },
+          {
+            "id": 909,
+            "origin_id": -10,
+            "origin_slot": 3,
+            "target_id": 134,
+            "target_slot": 0,
+            "type": "INT",
+            "parentId": 6
+          },
+          {
+            "id": 924,
+            "origin_id": 122,
+            "origin_slot": 0,
+            "target_id": 123,
+            "target_slot": 1,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 926,
+            "origin_id": 230,
+            "origin_slot": 0,
+            "target_id": 126,
+            "target_slot": 0,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 927,
+            "origin_id": 143,
+            "origin_slot": 0,
+            "target_id": 232,
+            "target_slot": 1,
+            "type": "VAE",
+            "parentId": 33
+          },
+          {
+            "id": 934,
+            "origin_id": -10,
+            "origin_slot": 2,
+            "target_id": 237,
+            "target_slot": 0,
+            "type": "*"
+          },
+          {
+            "id": 935,
+            "origin_id": 237,
+            "origin_slot": 0,
+            "target_id": 238,
+            "target_slot": 0,
+            "type": "*"
+          },
+          {
+            "id": 936,
+            "origin_id": 238,
+            "origin_slot": 0,
+            "target_id": 230,
+            "target_slot": 1,
+            "type": "STRING"
           }
         ],
         "reroutes": [
           {
             "id": 1,
             "pos": [
-              -1676.0550379991319,
-              4125.285899324518
+              -1674.8006514879012,
+              4230.654366267882
             ],
             "linkIds": [
               673
@@ -3673,8 +3805,8 @@
             "id": 2,
             "parentId": 1,
             "pos": [
-              -366.85183622775236,
-              4126.427391049734
+              -365.59744971652174,
+              4230.54147148187
             ],
             "linkIds": [
               673
@@ -3687,7 +3819,8 @@
               5110.09474183992
             ],
             "linkIds": [
-              519
+              519,
+              909
             ]
           },
           {
@@ -3705,7 +3838,7 @@
             "id": 11,
             "pos": [
               -691.7306852739108,
-              5534.783954216885
+              5463.252822584722
             ],
             "linkIds": [
               538
@@ -3715,8 +3848,8 @@
             "id": 12,
             "parentId": 11,
             "pos": [
-              1839.3653995411805,
-              5534.783954216885
+              1838.3287164740477,
+              5464.289505651855
             ],
             "linkIds": [
               538
@@ -3753,15 +3886,14 @@
             "linkIds": [
               540,
               541,
-              542,
-              900
+              542
             ]
           },
           {
             "id": 17,
             "pos": [
               276.98834575766654,
-              4100.6134892365
+              4231.696879660107
             ],
             "linkIds": [
               674,
@@ -3772,8 +3904,8 @@
             "id": 18,
             "parentId": 17,
             "pos": [
-              1074.192226653917,
-              4100.613489236504
+              1129.3852331480625,
+              4231.696879660111
             ],
             "linkIds": [
               674,
@@ -3875,25 +4007,13 @@
             ]
           },
           {
-            "id": 31,
-            "parentId": 16,
+            "id": 33,
             "pos": [
-              1906.2396469458972,
-              5787.60624412818
+              357.382215592065,
+              4288.995597662531
             ],
             "linkIds": [
-              900
-            ]
-          },
-          {
-            "id": 32,
-            "parentId": 31,
-            "pos": [
-              2251.466132388834,
-              5787.8764389826965
-            ],
-            "linkIds": [
-              900
+              927
             ]
           }
         ],
@@ -3903,15 +4023,7 @@
             {
               "downstream": 123,
               "downstream_slot": 0,
-              "upstream": "122",
-              "upstream_slot": 0,
-              "controller": 126,
-              "type": "CONDITIONING"
-            },
-            {
-              "downstream": 123,
-              "downstream_slot": 1,
-              "upstream": "122",
+              "upstream": "230",
               "upstream_slot": 0,
               "controller": 126,
               "type": "CONDITIONING"
@@ -3958,13 +4070,12 @@
             }
           ],
           "links_added_by_ue": [
-            902,
-            903,
-            904,
-            905,
-            906,
-            907,
-            908
+            928,
+            929,
+            930,
+            931,
+            932,
+            933
           ]
         }
       }
@@ -4373,10 +4484,10 @@
     "ue_links": [],
     "links_added_by_ue": [],
     "ds": {
-      "scale": 0.45,
+      "scale": 0.4090909090909098,
       "offset": [
-        1893.9959615155715,
-        -3560.441786134839
+        2380.066949060673,
+        -3142.6232789643227
       ]
     }
   },
