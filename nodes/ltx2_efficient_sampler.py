@@ -196,6 +196,84 @@ class LTX2EfficientSampler:
             sigmas[non_zero_mask] = stretched
         
         return sigmas
+    
+    def _sample_nested_tensor(self, model, positive, negative, latent_video, nested_samples,
+                               steps, cfg, sampler_name, denoise, seed, sigmas):
+        """
+        Direct sampling for NestedTensor (audio-video mode).
+        
+        This method bypasses all efficient features (frame striding, attention freezing, etc.)
+        and samples the NestedTensor directly using ComfyUI's native KSampler.
+        
+        This ensures both video and audio latents are properly denoised together,
+        maintaining audio-video synchronization.
+        """
+        import comfy.sample
+        import comfy.samplers
+        
+        print(f"[LTX2Efficient] Direct NestedTensor sampling mode")
+        print(f"[LTX2Efficient] NestedTensor type: {type(nested_samples)}")
+        print(f"[LTX2Efficient] NestedTensor .shape (video): {nested_samples.shape}")
+        
+        # Prepare noise for the NestedTensor
+        # comfy.sample.prepare_noise handles NestedTensor natively
+        noise = comfy.sample.prepare_noise(nested_samples, seed)
+        
+        # Create sampler
+        sampler = comfy.samplers.KSampler(
+            model,
+            steps=steps,
+            device=comfy.model_management.get_torch_device(),
+            sampler=sampler_name,
+            scheduler="simple",  # Overridden by explicit sigmas
+            denoise=denoise,
+            model_options=model.model_options
+        )
+        
+        # Truncate sigmas for denoise < 1.0
+        use_sigmas = sigmas
+        if denoise < 1.0:
+            total_steps = len(use_sigmas) - 1
+            start_step = int(total_steps * (1 - denoise))
+            use_sigmas = use_sigmas[start_step:]
+        
+        print(f"[LTX2Efficient] Running NestedTensor sampling with {len(use_sigmas)-1} steps")
+        print(f"[LTX2Efficient] Sigmas: {use_sigmas[0]:.4f} -> {use_sigmas[-1]:.4f}")
+        
+        # Handle denoise_mask for NestedTensor
+        # The noise_mask from LTXVConcatAVLatent may have incorrect dimensions
+        # for the patchifier which expects 5D (B, C, F, H, W). Skip it if problematic.
+        denoise_mask = latent_video.get("noise_mask", None)
+        if denoise_mask is not None:
+            mask_shape = denoise_mask.shape if hasattr(denoise_mask, 'shape') else None
+            print(f"[LTX2Efficient] noise_mask shape: {mask_shape}")
+            # The patchifier expects 5D tensors - skip if not compatible
+            if mask_shape is not None and len(mask_shape) != 5:
+                print(f"[LTX2Efficient] Skipping noise_mask (need 5D, got {len(mask_shape)}D)")
+                denoise_mask = None
+        
+        # Sample using the KSampler - this handles NestedTensor natively
+        result_tensor = sampler.sample(
+            noise,
+            positive,
+            negative,
+            cfg=cfg,
+            latent_image=nested_samples,
+            start_step=0,
+            last_step=len(use_sigmas) - 1,
+            force_full_denoise=False,
+            denoise_mask=denoise_mask,
+            sigmas=use_sigmas,
+            callback=None,
+            disable_pbar=False,
+            seed=seed
+        )
+        
+        print(f"[LTX2Efficient] NestedTensor sampling complete")
+        print(f"[LTX2Efficient] Result type: {type(result_tensor)}")
+        
+        # Return the result wrapped in latent dictionary
+        return ({"samples": result_tensor},)
 
     def sample(self, model, latent_video, positive, negative, seed, steps, cfg, sampler_name, denoise,
                optimization_preset, target_temp, frame_stride, attention_window, freeze_ratio, 
@@ -282,62 +360,106 @@ class LTX2EfficientSampler:
         # - 4D: (Frames, Channels, Height, Width) - some sources
         # ComfyUI/LTXVConcatAVLatent may use NestedTensor wrapper
         
-        # Convert NestedTensor to regular tensor if needed
-        # Try multiple methods since NestedTensor API varies by PyTorch version
+        # Check for NestedTensor (audio-video mode)
+        # ComfyUI uses a custom NestedTensor class for combined audio-video latents (LTXVConcatAVLatent)
         is_nested = str(type(samples).__name__) == 'NestedTensor' or 'nested' in str(type(samples)).lower()
-        converted = False  # Track if NestedTensor was successfully converted
         
+        # AUDIO-VIDEO MODE: When NestedTensor is detected, we must sample the full tensor
+        # without efficient features. This is because:
+        # 1. NestedTensor contains BOTH video latent AND audio latent
+        # 2. Both need to be denoised together during sampling
+        # 3. Frame striding/extraction would break audio-video synchronization
+        # 4. ComfyUI's samplers natively support NestedTensor operations
         if is_nested:
-            print(f"[LTX2Efficient] Detected NestedTensor, attempting conversion...")
+            # NestedTensor (audio-video combined latent from LTXVConcatAVLatent) is NOT supported
+            # because ComfyUI's model_base.py process_timestep can't handle the 3D audio tensor shape
+            # when computing denoise_mask for patchifier. This causes "not enough values to unpack" error.
+            #
+            # WORKAROUND for users:
+            # Option 1: Use standard KSampler node (NOT the efficient sampler) for audio-video
+            # Option 2: Use LTXVSeparateAVLatent before this node to split video from audio,
+            #           then sample video efficiently and recombine after
             
-            # Method 1: Try .values() 
-            if hasattr(samples, 'values') and callable(samples.values):
+            error_msg = """
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  LTX2 Efficient Sampler: Audio-Video Mode NOT Supported                      ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  Detected NestedTensor from LTXVConcatAVLatent (combined audio+video).       ║
+║  This is not compatible with the efficient sampler optimizations.            ║
+║                                                                              ║
+║  WORKAROUNDS:                                                                ║
+║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ║
+║                                                                              ║
+║  Option 1: Use standard KSampler                                             ║
+║    • Replace LTX2EfficientSampler with standard KSampler node                ║
+║    • Works with audio-video but no VRAM optimizations                        ║
+║                                                                              ║
+║  Option 2: Split audio from video (RECOMMENDED)                              ║
+║    • Use LTXVSeparateAVLatent node BEFORE this sampler                       ║
+║    • Connect ONLY the video latent to LTX2EfficientSampler                   ║
+║    • Use a separate KSampler for audio latent                                ║
+║    • Use LTXVConcatAVLatent to recombine after sampling                      ║
+║                                                                              ║
+║  This limitation exists because ComfyUI's model internals don't properly     ║
+║  handle the 3D audio tensor shape in process_timestep for patchifier.        ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+"""
+            print(error_msg)
+            raise ValueError(
+                "[LTX2EfficientSampler] Audio-video NestedTensor is not supported. "
+                "Use standard KSampler or LTXVSeparateAVLatent to split video from audio first. "
+                "See console output for detailed workarounds."
+            )
+        
+        # Video-only mode continues below with efficient features
+        converted = False  # Track if NestedTensor was successfully converted
+        original_audio_latent = None  # Store audio latent for recombination (fallback only)
+        nested_tensor_class = None  # Store the NestedTensor class for reconstruction
+        
+        # Legacy fallback - this code path should not be reached for NestedTensor
+        if is_nested:
+            print(f"[LTX2Efficient] Detected NestedTensor (likely from LTXVConcatAVLatent)")
+            nested_tensor_class = type(samples)  # Store class for reconstruction
+            
+            # ComfyUI's NestedTensor has .tensors attribute with [video_latent, audio_latent]
+            # or can be accessed via unbind()
+            if hasattr(samples, 'tensors') and isinstance(samples.tensors, list):
                 try:
-                    samples = samples.values()
+                    # Get the first tensor (video latent) and store audio latent
+                    video_tensor = samples.tensors[0]
+                    if len(samples.tensors) > 1:
+                        original_audio_latent = samples.tensors[1]
+                        print(f"[LTX2Efficient] Stored audio latent: {original_audio_latent.shape}")
+                    print(f"[LTX2Efficient] Extracted video tensor via .tensors[0]: {video_tensor.shape}")
+                    samples = video_tensor
                     converted = True
-                    print(f"[LTX2Efficient] Converted via .values()")
-                except:
-                    pass
+                except Exception as e:
+                    print(f"[LTX2Efficient] .tensors access failed: {e}")
             
-            # Method 2: Try ._values
-            if not converted and hasattr(samples, '_values'):
-                try:
-                    samples = samples._values
-                    converted = True
-                    print(f"[LTX2Efficient] Converted via ._values")
-                except:
-                    pass
-            
-            # Method 3: Try .to_padded_tensor() - common NestedTensor method
-            if not converted and hasattr(samples, 'to_padded_tensor'):
-                try:
-                    samples = samples.to_padded_tensor(0.0)
-                    converted = True
-                    print(f"[LTX2Efficient] Converted via .to_padded_tensor()")
-                except:
-                    pass
-            
-            # Method 4: Try unbind and stack - works for list-like NestedTensors
+            # Fallback: Try unbind() which returns list of tensors
             if not converted and hasattr(samples, 'unbind'):
                 try:
                     tensors = samples.unbind()
-                    samples = torch.stack(tensors)
-                    converted = True
-                    print(f"[LTX2Efficient] Converted via .unbind() + stack")
-                except:
-                    pass
-            
-            # Method 5: Direct clone - sometimes works
-            if not converted:
-                try:
-                    samples = samples.clone().detach()
-                    converted = True
-                    print(f"[LTX2Efficient] Converted via .clone().detach()")
-                except:
-                    pass
+                    if isinstance(tensors, (list, tuple)) and len(tensors) > 0:
+                        # First tensor is video, second is audio
+                        video_tensor = tensors[0]
+                        if len(tensors) > 1:
+                            original_audio_latent = tensors[1]
+                            print(f"[LTX2Efficient] Stored audio latent: {original_audio_latent.shape}")
+                        print(f"[LTX2Efficient] Extracted video tensor via unbind()[0]: {video_tensor.shape}")
+                        samples = video_tensor
+                        converted = True
+                except Exception as e:
+                    print(f"[LTX2Efficient] unbind() failed: {e}")
             
             if not converted:
-                print(f"[LTX2Efficient] Warning: Could not convert NestedTensor, proceeding with original")
+                print(f"[LTX2Efficient] ⚠️ ERROR: Could not extract video tensor from NestedTensor!")
+                print(f"[LTX2Efficient] NestedTensor type: {type(samples)}")
+                print(f"[LTX2Efficient] Available attrs: {[a for a in dir(samples) if not a.startswith('_')]}")
+                raise ValueError("Cannot process NestedTensor from LTXVConcatAVLatent. "
+                                "Please use LTX2SeparateAVLatent node to extract video-only latent before this node.")
         
         # Ensure we have a contiguous tensor for index operations (only if method exists)
         if hasattr(samples, 'is_contiguous') and not samples.is_contiguous():
@@ -419,7 +541,24 @@ class LTX2EfficientSampler:
                 indices = list(range(original_frames_count))
         
         print(f"[LTX2Efficient] Keyframe selection: {original_frames_count} frames -> {len(indices)} keyframes (stride={frame_stride})")
-        print(f"[LTX2Efficient] Keyframes shape: {keyframes.shape}")
+        print(f"[LTX2Efficient] Keyframes shape before normalization: {keyframes.shape}")
+        
+        # CRITICAL: Ensure keyframes are ALWAYS 5D (B, C, F, H, W) for LTX model
+        # The symmetric_patchifier.patchify() explicitly expects: b, _, f, h, w = latents.shape
+        kf_ndims = len(keyframes.shape)
+        if kf_ndims == 3:
+            # (C, H, W) -> (1, C, 1, H, W)
+            keyframes = keyframes.unsqueeze(0).unsqueeze(2)
+            print(f"[LTX2Efficient] Normalized 3D -> 5D: {keyframes.shape}")
+        elif kf_ndims == 4:
+            # Could be (B, C, H, W) or (F, C, H, W) - assume (F, C, H, W) and convert
+            # (F, C, H, W) -> (1, C, F, H, W)
+            keyframes = keyframes.permute(1, 0, 2, 3).unsqueeze(0)
+            print(f"[LTX2Efficient] Normalized 4D -> 5D: {keyframes.shape}")
+        elif kf_ndims == 5:
+            print(f"[LTX2Efficient] Already 5D: {keyframes.shape}")
+        else:
+            raise ValueError(f"[LTX2Efficient] Cannot normalize keyframes with {kf_ndims} dimensions to 5D. Shape: {keyframes.shape}")
         
         kf_latent = {"samples": keyframes}
         
@@ -593,6 +732,17 @@ class LTX2EfficientSampler:
                 full_frames_count = full_samples.shape[0]
                 if full_frames_count > original_frames_count:
                     full_samples = full_samples[:original_frames_count]
+        
+        # Recombine with audio if we originally had a NestedTensor
+        if original_audio_latent is not None and nested_tensor_class is not None:
+            try:
+                # Reconstruct NestedTensor with [video, audio]
+                reconstructed = nested_tensor_class([full_samples, original_audio_latent])
+                print(f"[LTX2Efficient] Reconstructed NestedTensor with video {full_samples.shape} + audio {original_audio_latent.shape}")
+                return ({"samples": reconstructed},)
+            except Exception as e:
+                print(f"[LTX2Efficient] Warning: Could not reconstruct NestedTensor: {e}")
+                print(f"[LTX2Efficient] Returning video-only latent")
         
         # Return video-only latent (use LTX2CombineAVLatent to recombine with audio if needed)
         return ({"samples": full_samples},)
