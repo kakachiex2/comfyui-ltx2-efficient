@@ -1,10 +1,9 @@
-
 # ComfyUI Error Report
 ## Error Details
 - **Node ID:** 92:228
 - **Node Type:** LTX2EfficientSamplerPro
-- **Exception Type:** RuntimeError
-- **Exception Message:** mat1 and mat2 shapes cannot be multiplied (1024x7680 and 4096x4096)
+- **Exception Type:** AttributeError
+- **Exception Message:** 'list' object has no attribute 'ndim'
 
 ## Stack Trace
 ```
@@ -119,62 +118,14 @@
     return forward_call(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-ltx2-efficient\nodes\ltx2_efficient_sampler_pro.py", line 231, in patched_forward
-    out_video = original_forward(x_video_5d, timestep, context, attention_mask=attention_mask, **kwargs)
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 745, in forward
-    return comfy.patcher_extension.WrapperExecutor.new_class_executor(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\patcher_extension.py", line 112, in execute
-    return self.original(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 785, in _forward
-    context, attention_mask = self._prepare_context(context, batch_size, x, attention_mask)
-                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 674, in _prepare_context
-    context = self.caption_projection(context)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1775, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1786, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 269, in forward
-    hidden_states = self.linear_1(caption)
-                    ^^^^^^^^^^^^^^^^^^^^^^
-
-  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1775, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1786, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ops.py", line 164, in forward
-    return self.forward_comfy_cast_weights(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\Vantage-Nodes\ops.py", line 215, in forward_comfy_cast_weights
-    out = self.forward_ggml_cast_weights(input, *args, **kwargs)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\Vantage-Nodes\ops.py", line 244, in forward_ggml_cast_weights
-    return torch.nn.functional.linear(input, weight, bias)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-ltx2-efficient\nodes\ltx2_efficient_sampler_pro.py", line 203, in patched_forward
+    if x.ndim == 3 and current_shape is not None and len(current_shape) == 5:
+       ^^^^^^
 
 ```
 ## System Information
 - **ComfyUI Version:** 0.10.0
-- **Arguments:** C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\main.py --user-directory C:\Users\rafae\Documents\ComfyUI\user --input-directory C:\Users\rafae\Documents\ComfyUI\input --output-directory C:\Users\rafae\Documents\ComfyUI\output --front-end-root C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\web_custom_versions\desktop_app --base-directory C:\Users\rafae\Documents\ComfyUI --database-url sqlite:///C:/Users/rafae/Documents/ComfyUI/user/comfyui.db --extra-model-paths-config C:\Users\rafae\AppData\Roaming\ComfyUI\extra_models_config.yaml --log-stdout --listen 127.0.0.1 --port 8000 --enable-manager
+- **Arguments:** C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\main.py --user-directory C:\Users\rafae\Documents\ComfyUI\user --input-directory C:\Users\rafae\Documents\ComfyUI\input --output-directory C:\Users\rafae\Documents\ComfyUI\output --front-end-root C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\web_custom_versions\desktop_app --base-directory C:\Users\rafae\Documents\ComfyUI --database-url sqlite:///C:/Users/rafae/Documents/ComfyUI/user/comfyui.db --extra-model-paths-config C:\Users\rafae\AppData\Roaming\ComfyUI\extra_models_config.yaml --log-stdout --listen 127.0.0.1 --port 8002 --enable-manager
 - **OS:** win32
 - **Python Version:** 3.12.9 (main, Feb 12 2025, 14:52:31) [MSC v.1942 64 bit (AMD64)]
 - **Embedded Python:** false
@@ -190,34 +141,7 @@
 
 ## Logs
 ```
-2026-01-28T18:31:33.687806 - SenseVoice.available
-2026-01-28T18:31:33.734762 - Whisper.available False
-2026-01-28T18:31:33.735988 - fal-client## OK2026-01-28T18:31:33.735988 - 
-2026-01-28T18:31:33.755018 - FalVideo.available
-2026-01-28T18:31:33.756028 - [93m -------------- [0m
-2026-01-28T18:31:33.761141 - [MultiGPU Core Patching] Patching mm.soft_empty_cache for Comprehensive Memory Management (VRAM + CPU + Store Pruning)
-2026-01-28T18:31:33.764224 - [MultiGPU Core Patching] Patching mm.get_torch_device, mm.text_encoder_device, mm.unet_offload_device
-2026-01-28T18:31:33.764224 - [MultiGPU DEBUG] Initial current_device: cuda:0
-2026-01-28T18:31:33.764224 - [MultiGPU DEBUG] Initial current_text_encoder_device: cuda:0
-2026-01-28T18:31:33.764224 - [MultiGPU DEBUG] Initial current_unet_offload_device: cpu
-2026-01-28T18:31:33.771885 - [MultiGPU] Initiating custom_node Registration. . .
-2026-01-28T18:31:33.772925 - -----------------------------------------------
-2026-01-28T18:31:33.772925 - custom_node                   Found     Nodes
-2026-01-28T18:31:33.772925 - -----------------------------------------------
-2026-01-28T18:31:33.774432 - ComfyUI-LTXVideo                  N         0
-2026-01-28T18:31:33.775446 - ComfyUI-Florence2                 N         0
-2026-01-28T18:31:33.775446 - ComfyUI_bitsandbytes_NF4          N         0
-2026-01-28T18:31:33.776447 - x-flux-comfyui                    N         0
-2026-01-28T18:31:33.776952 - ComfyUI-MMAudio                   N         0
-2026-01-28T18:31:33.776952 - ComfyUI-GGUF                      Y        18
-2026-01-28T18:31:33.776952 - PuLID_ComfyUI                     N         0
-2026-01-28T18:31:33.777967 - ComfyUI-WanVideoWrapper           N         0
-2026-01-28T18:31:33.777967 - -----------------------------------------------
-2026-01-28T18:31:33.777967 - [MultiGPU] Registration complete. Final mappings: CheckpointLoaderAdvancedMultiGPU, CheckpointLoaderAdvancedDisTorch2MultiGPU, UNetLoaderLP, UNETLoaderMultiGPU, VAELoaderMultiGPU, CLIPLoaderMultiGPU, DualCLIPLoaderMultiGPU, TripleCLIPLoaderMultiGPU, QuadrupleCLIPLoaderMultiGPU, CLIPVisionLoaderMultiGPU, CheckpointLoaderSimpleMultiGPU, ControlNetLoaderMultiGPU, DiffusersLoaderMultiGPU, DiffControlNetLoaderMultiGPU, UNETLoaderDisTorch2MultiGPU, VAELoaderDisTorch2MultiGPU, CLIPLoaderDisTorch2MultiGPU, DualCLIPLoaderDisTorch2MultiGPU, TripleCLIPLoaderDisTorch2MultiGPU, QuadrupleCLIPLoaderDisTorch2MultiGPU, CLIPVisionLoaderDisTorch2MultiGPU, CheckpointLoaderSimpleDisTorch2MultiGPU, ControlNetLoaderDisTorch2MultiGPU, DiffusersLoaderDisTorch2MultiGPU, DiffControlNetLoaderDisTorch2MultiGPU, UnetLoaderGGUFDisTorchMultiGPU, UnetLoaderGGUFAdvancedDisTorchMultiGPU, CLIPLoaderGGUFDisTorchMultiGPU, DualCLIPLoaderGGUFDisTorchMultiGPU, TripleCLIPLoaderGGUFDisTorchMultiGPU, QuadrupleCLIPLoaderGGUFDisTorchMultiGPU, UnetLoaderGGUFDisTorch2MultiGPU, UnetLoaderGGUFAdvancedDisTorch2MultiGPU, CLIPLoaderGGUFDisTorch2MultiGPU, DualCLIPLoaderGGUFDisTorch2MultiGPU, TripleCLIPLoaderGGUFDisTorch2MultiGPU, QuadrupleCLIPLoaderGGUFDisTorch2MultiGPU, UnetLoaderGGUFMultiGPU, UnetLoaderGGUFAdvancedMultiGPU, CLIPLoaderGGUFMultiGPU, DualCLIPLoaderGGUFMultiGPU, TripleCLIPLoaderGGUFMultiGPU, QuadrupleCLIPLoaderGGUFMultiGPU
-2026-01-28T18:31:33.792241 - [PromptControl] ERROR: Your lark package reports an ancient version (0.12.0) and will not work. If you have the 'lark-parser' package in your Python environment, remove that and *reinstall* lark!
-C:\Users\rafae\Documents\ComfyUI\.venv\Scripts\python.exe -m pip uninstall lark-parser lark
-C:\Users\rafae\Documents\ComfyUI\.venv\Scripts\python.exe -m pip install lark
-2026-01-28T18:31:33.794840 - Traceback (most recent call last):
+2026-01-28T21:06:42.214214 - Traceback (most recent call last):
   File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\nodes.py", line 2158, in load_custom_node
     module_spec.loader.exec_module(module)
   File "<frozen importlib._bootstrap_external>", line 999, in exec_module
@@ -244,76 +168,76 @@ ImportError: Your lark package reports an ancient version (0.12.0) and will not 
 C:\Users\rafae\Documents\ComfyUI\.venv\Scripts\python.exe -m pip uninstall lark-parser lark
 C:\Users\rafae\Documents\ComfyUI\.venv\Scripts\python.exe -m pip install lark
 
-2026-01-28T18:31:33.795841 - Cannot import C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-prompt-control module for custom nodes: Your lark package reports an ancient version (0.12.0) and will not work. If you have the 'lark-parser' package in your Python environment, remove that and *reinstall* lark!
+2026-01-28T21:06:42.214214 - Cannot import C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-prompt-control module for custom nodes: Your lark package reports an ancient version (0.12.0) and will not work. If you have the 'lark-parser' package in your Python environment, remove that and *reinstall* lark!
 C:\Users\rafae\Documents\ComfyUI\.venv\Scripts\python.exe -m pip uninstall lark-parser lark
 C:\Users\rafae\Documents\ComfyUI\.venv\Scripts\python.exe -m pip install lark
-2026-01-28T18:31:34.052622 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\AILab_SAM3Segment.py: No module named 'triton'2026-01-28T18:31:34.052622 - 
-2026-01-28T18:31:34.083940 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\py\AILab_SAM3Segment.py: No module named 'triton'2026-01-28T18:31:34.083940 - 
-2026-01-28T18:31:34.105159 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model_builder.py: No module named 'triton'2026-01-28T18:31:34.105159 - 
-2026-01-28T18:31:34.109293 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\visualization_utils.py: No module named 'pandas'2026-01-28T18:31:34.109293 - 
-2026-01-28T18:31:34.156767 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\decoder.py: attempted relative import with no known parent package2026-01-28T18:31:34.156767 - 
-2026-01-28T18:31:34.159914 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\edt.py: No module named 'triton'2026-01-28T18:31:34.159914 - 
-2026-01-28T18:31:34.161420 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\encoder.py: attempted relative import with no known parent package2026-01-28T18:31:34.161420 - 
-2026-01-28T18:31:34.162523 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\geometry_encoders.py: attempted relative import with no known parent package2026-01-28T18:31:34.162523 - 
-2026-01-28T18:31:34.172230 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\io_utils.py: No module named 'triton'2026-01-28T18:31:34.172230 - 
-2026-01-28T18:31:34.174220 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\maskformer_segmentation.py: attempted relative import with no known parent package2026-01-28T18:31:34.174220 - 
-2026-01-28T18:31:34.175237 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\memory.py: attempted relative import with no known parent package2026-01-28T18:31:34.175237 - 
-2026-01-28T18:31:34.184806 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\sam1_task_predictor.py: No module named 'triton'2026-01-28T18:31:34.184806 - 
-2026-01-28T18:31:34.193002 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\sam3_image.py: No module named 'triton'2026-01-28T18:31:34.193002 - 
-2026-01-28T18:31:34.202265 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\sam3_tracker_base.py: No module named 'triton'2026-01-28T18:31:34.202265 - 
-2026-01-28T18:31:34.204953 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\sam3_tracker_utils.py: No module named 'triton'2026-01-28T18:31:34.204953 - 
-2026-01-28T18:31:34.210077 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\sam3_tracking_predictor.py: No module named 'triton'2026-01-28T18:31:34.211077 - 
-2026-01-28T18:31:34.218232 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\sam3_video_base.py: No module named 'triton'2026-01-28T18:31:34.218232 - 
-2026-01-28T18:31:34.226953 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\sam3_video_inference.py: No module named 'triton'2026-01-28T18:31:34.226953 - 
-2026-01-28T18:31:34.235356 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\sam3_video_predictor.py: No module named 'triton'2026-01-28T18:31:34.235356 - 
-2026-01-28T18:31:34.236861 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\text_encoder_ve.py: attempted relative import with no known parent package2026-01-28T18:31:34.236861 - 
-2026-01-28T18:31:34.240505 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\vitdet.py: attempted relative import with no known parent package2026-01-28T18:31:34.240505 - 
-2026-01-28T18:31:34.242595 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\vl_combiner.py: attempted relative import with no known parent package2026-01-28T18:31:34.243101 - 
-2026-01-28T18:31:34.254549 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\perflib\associate_det_trk.py: No module named 'triton'2026-01-28T18:31:34.254549 - 
-2026-01-28T18:31:34.918179 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\perflib\nms.py: No module named 'triton'2026-01-28T18:31:34.918179 - 
-2026-01-28T18:31:34.921264 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\sam\mask_decoder.py: attempted relative import with no known parent package2026-01-28T18:31:34.921264 - 
-2026-01-28T18:31:34.921845 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\sam\prompt_encoder.py: attempted relative import with no known parent package2026-01-28T18:31:34.921845 - 
-2026-01-28T18:31:34.923656 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\sam\transformer.py: attempted relative import with no known parent package2026-01-28T18:31:34.923656 - 
-2026-01-28T18:31:34.928032 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\train.py: No module named 'submitit'2026-01-28T18:31:34.928032 - 
-2026-01-28T18:31:34.935244 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\trainer.py: No module named 'triton'2026-01-28T18:31:34.935244 - 
-2026-01-28T18:31:35.064225 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\perflib\tests\tests.py: No module named 'triton'2026-01-28T18:31:35.064225 - 
-2026-01-28T18:31:35.066845 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\perflib\triton\connected_components.py: No module named 'triton'2026-01-28T18:31:35.066845 - 
-2026-01-28T18:31:35.068864 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\perflib\triton\nms.py: No module named 'triton'2026-01-28T18:31:35.068864 - 
-2026-01-28T18:31:35.072392 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\data\collator.py: attempted relative import with no known parent package2026-01-28T18:31:35.072392 - 
-2026-01-28T18:31:35.127783 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\data\sam3_image_dataset.py: attempted relative import with no known parent package2026-01-28T18:31:35.127783 - 
-2026-01-28T18:31:35.129288 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\data\sam3_video_dataset.py: attempted relative import with no known parent package2026-01-28T18:31:35.129288 - 
-2026-01-28T18:31:35.132668 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\loss\loss_fns.py: No module named 'torchmetrics'2026-01-28T18:31:35.132668 - 
-2026-01-28T18:31:35.140233 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\loss\sam3_loss.py: No module named 'triton'2026-01-28T18:31:35.140233 - 
-2026-01-28T18:31:35.142948 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\loss\sigmoid_focal_loss.py: No module named 'triton'2026-01-28T18:31:35.142948 - 
-2026-01-28T18:31:35.157626 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\transforms\basic_for_api.py: No module named 'triton'2026-01-28T18:31:35.157626 - 
-2026-01-28T18:31:35.168438 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\transforms\filter_query_transforms.py: No module named 'triton'2026-01-28T18:31:35.168438 - 
-2026-01-28T18:31:35.180776 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\transforms\point_sampling.py: No module named 'triton'2026-01-28T18:31:35.180776 - 
-2026-01-28T18:31:35.192411 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\transforms\segmentation.py: No module named 'triton'2026-01-28T18:31:35.192411 - 
-2026-01-28T18:31:35.205018 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\utils\logger.py: No module named 'triton'2026-01-28T18:31:35.205018 - 
-2026-01-28T18:31:35.213892 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\SDMatte\utils\utils.py: attempted relative import with no known parent package2026-01-28T18:31:35.213892 - 
-2026-01-28T18:31:35.215487 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\SDMatte\modeling\SDMatte\meta_arch.py: attempted relative import with no known parent package2026-01-28T18:31:35.215487 - 
-2026-01-28T18:31:35.247930 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\py\AILab_SAM3Segment.py: No module named 'triton'2026-01-28T18:31:35.249434 - 
-2026-01-28T18:31:35.259184 - [34m[ComfyUI-RMBG][0m v[93m3.0.0[0m | [93m43 nodes[0m [92mLoaded[0m2026-01-28T18:31:35.259184 - 
-2026-01-28T18:31:35.484451 - [36;20m[C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_controlnet_aux] | INFO -> Using ckpts path: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_controlnet_aux\ckpts[0m
-2026-01-28T18:31:35.485468 - [36;20m[C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_controlnet_aux] | INFO -> Using symlinks: False[0m
-2026-01-28T18:31:35.485468 - [36;20m[C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_controlnet_aux] | INFO -> Using ort providers: ['CUDAExecutionProvider', 'DirectMLExecutionProvider', 'OpenVINOExecutionProvider', 'ROCMExecutionProvider', 'CPUExecutionProvider', 'CoreMLExecutionProvider'][0m
-2026-01-28T18:31:38.029913 - ('Looking for cached Spacy xx_sent_ud_sm.',)
-2026-01-28T18:31:38.617063 - [1;35m
-### [START] ComfyUI AlekPet Nodes [1;34mv1.0.92[0m[1;35m ###[0m2026-01-28T18:31:38.617063 - 
-2026-01-28T18:31:38.617063 - [92mNode -> ArgosTranslateNode: [93mArgosTranslateCLIPTextEncodeNode, ArgosTranslateTextNode[0m [92m[92m[Loading][0m[0m2026-01-28T18:31:38.617063 - 
-2026-01-28T18:31:38.617063 - [92mNode -> ChatGLMNode: [93mChatGLM4TranslateCLIPTextEncodeNode, ChatGLM4TranslateTextNode, ChatGLM4InstructNode, ChatGLM4InstructMediaNode, ChatGLMImageGenerateNode, ChatGLMVideoGenerateNode[0m [92m[92m[Loading][0m[0m2026-01-28T18:31:38.617063 - 
-2026-01-28T18:31:38.617063 - [92mNode -> DeepTranslatorNode: [93mDeepTranslatorCLIPTextEncodeNode, DeepTranslatorTextNode[0m [92m[92m[Loading][0m[0m2026-01-28T18:31:38.617063 - 
-2026-01-28T18:31:38.617063 - [92mNode -> ExtrasNode: [93mPreviewTextNode, HexToHueNode, ColorsCorrectNode[0m [92m[92m[Loading][0m[0m2026-01-28T18:31:38.617063 - 
-2026-01-28T18:31:38.617063 - [92mNode -> GoogleTranslateNode: [93mGoogleTranslateCLIPTextEncodeNode, GoogleTranslateTextNode[0m [92m[92m[Loading][0m[0m2026-01-28T18:31:38.617063 - 
-2026-01-28T18:31:38.617063 - [92mNode -> IDENode: [93mIDENode[0m [92m[92m[Loading][0m[0m2026-01-28T18:31:38.617063 - 
-2026-01-28T18:31:38.617063 - [92mNode -> PainterNode: [93mPainterNode[0m [92m[92m[Loading][0m[0m2026-01-28T18:31:38.617063 - 
-2026-01-28T18:31:38.617063 - [92mNode -> PoseNode: [93mPoseNode[0m [92m[92m[Loading][0m[0m2026-01-28T18:31:38.617063 - 
-2026-01-28T18:31:38.617063 - [1;35m### [END] ComfyUI AlekPet Nodes ###[0m2026-01-28T18:31:38.617063 - 
-2026-01-28T18:31:38.651069 - # 😺dzNodes: LayerStyle -> [1;33mCannot import name 'guidedFilter' from 'cv2.ximgproc'
+2026-01-28T21:06:42.409861 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\AILab_SAM3Segment.py: No module named 'triton'2026-01-28T21:06:42.409861 - 
+2026-01-28T21:06:42.433368 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\py\AILab_SAM3Segment.py: No module named 'triton'2026-01-28T21:06:42.433368 - 
+2026-01-28T21:06:42.446914 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model_builder.py: No module named 'triton'2026-01-28T21:06:42.446914 - 
+2026-01-28T21:06:42.450016 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\visualization_utils.py: No module named 'pandas'2026-01-28T21:06:42.450016 - 
+2026-01-28T21:06:42.484526 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\decoder.py: attempted relative import with no known parent package2026-01-28T21:06:42.484526 - 
+2026-01-28T21:06:42.486537 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\edt.py: No module named 'triton'2026-01-28T21:06:42.486537 - 
+2026-01-28T21:06:42.486537 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\encoder.py: attempted relative import with no known parent package2026-01-28T21:06:42.486537 - 
+2026-01-28T21:06:42.487542 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\geometry_encoders.py: attempted relative import with no known parent package2026-01-28T21:06:42.487542 - 
+2026-01-28T21:06:42.493695 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\io_utils.py: No module named 'triton'2026-01-28T21:06:42.493695 - 
+2026-01-28T21:06:42.494781 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\maskformer_segmentation.py: attempted relative import with no known parent package2026-01-28T21:06:42.494781 - 
+2026-01-28T21:06:42.495783 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\memory.py: attempted relative import with no known parent package2026-01-28T21:06:42.495783 - 
+2026-01-28T21:06:42.502357 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\sam1_task_predictor.py: No module named 'triton'2026-01-28T21:06:42.502357 - 
+2026-01-28T21:06:42.507167 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\sam3_image.py: No module named 'triton'2026-01-28T21:06:42.507167 - 
+2026-01-28T21:06:42.516664 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\sam3_tracker_base.py: No module named 'triton'2026-01-28T21:06:42.516664 - 
+2026-01-28T21:06:42.519676 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\sam3_tracker_utils.py: No module named 'triton'2026-01-28T21:06:42.519676 - 
+2026-01-28T21:06:42.525346 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\sam3_tracking_predictor.py: No module named 'triton'2026-01-28T21:06:42.525346 - 
+2026-01-28T21:06:42.533365 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\sam3_video_base.py: No module named 'triton'2026-01-28T21:06:42.533365 - 
+2026-01-28T21:06:42.540404 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\sam3_video_inference.py: No module named 'triton'2026-01-28T21:06:42.540404 - 
+2026-01-28T21:06:42.547735 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\sam3_video_predictor.py: No module named 'triton'2026-01-28T21:06:42.547735 - 
+2026-01-28T21:06:42.550308 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\text_encoder_ve.py: attempted relative import with no known parent package2026-01-28T21:06:42.550308 - 
+2026-01-28T21:06:42.552782 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\vitdet.py: attempted relative import with no known parent package2026-01-28T21:06:42.552782 - 
+2026-01-28T21:06:42.553285 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\model\vl_combiner.py: attempted relative import with no known parent package2026-01-28T21:06:42.553285 - 
+2026-01-28T21:06:42.560213 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\perflib\associate_det_trk.py: No module named 'triton'2026-01-28T21:06:42.560213 - 
+2026-01-28T21:06:43.244846 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\perflib\nms.py: No module named 'triton'2026-01-28T21:06:43.244846 - 
+2026-01-28T21:06:43.245847 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\sam\mask_decoder.py: attempted relative import with no known parent package2026-01-28T21:06:43.245847 - 
+2026-01-28T21:06:43.247039 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\sam\prompt_encoder.py: attempted relative import with no known parent package2026-01-28T21:06:43.247039 - 
+2026-01-28T21:06:43.248045 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\sam\transformer.py: attempted relative import with no known parent package2026-01-28T21:06:43.248045 - 
+2026-01-28T21:06:43.252139 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\train.py: No module named 'submitit'2026-01-28T21:06:43.252139 - 
+2026-01-28T21:06:43.262309 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\trainer.py: No module named 'triton'2026-01-28T21:06:43.262309 - 
+2026-01-28T21:06:43.362487 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\perflib\tests\tests.py: No module named 'triton'2026-01-28T21:06:43.362487 - 
+2026-01-28T21:06:43.365553 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\perflib\triton\connected_components.py: No module named 'triton'2026-01-28T21:06:43.365553 - 
+2026-01-28T21:06:43.368785 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\perflib\triton\nms.py: No module named 'triton'2026-01-28T21:06:43.368785 - 
+2026-01-28T21:06:43.372099 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\data\collator.py: attempted relative import with no known parent package2026-01-28T21:06:43.372099 - 
+2026-01-28T21:06:43.413934 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\data\sam3_image_dataset.py: attempted relative import with no known parent package2026-01-28T21:06:43.413934 - 
+2026-01-28T21:06:43.415480 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\data\sam3_video_dataset.py: attempted relative import with no known parent package2026-01-28T21:06:43.415480 - 
+2026-01-28T21:06:43.418616 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\loss\loss_fns.py: No module named 'torchmetrics'2026-01-28T21:06:43.418616 - 
+2026-01-28T21:06:43.425558 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\loss\sam3_loss.py: No module named 'triton'2026-01-28T21:06:43.425558 - 
+2026-01-28T21:06:43.427746 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\loss\sigmoid_focal_loss.py: No module named 'triton'2026-01-28T21:06:43.427746 - 
+2026-01-28T21:06:43.438755 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\transforms\basic_for_api.py: No module named 'triton'2026-01-28T21:06:43.438755 - 
+2026-01-28T21:06:43.446870 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\transforms\filter_query_transforms.py: No module named 'triton'2026-01-28T21:06:43.446870 - 
+2026-01-28T21:06:43.452953 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\transforms\point_sampling.py: No module named 'triton'2026-01-28T21:06:43.452953 - 
+2026-01-28T21:06:43.459112 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\transforms\segmentation.py: No module named 'triton'2026-01-28T21:06:43.459112 - 
+2026-01-28T21:06:43.467391 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\sam3\train\utils\logger.py: No module named 'triton'2026-01-28T21:06:43.467391 - 
+2026-01-28T21:06:43.473879 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\SDMatte\utils\utils.py: attempted relative import with no known parent package2026-01-28T21:06:43.473879 - 
+2026-01-28T21:06:43.474436 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\SDMatte\modeling\SDMatte\meta_arch.py: attempted relative import with no known parent package2026-01-28T21:06:43.474436 - 
+2026-01-28T21:06:43.495825 - Error loading C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg\py\AILab_SAM3Segment.py: No module named 'triton'2026-01-28T21:06:43.495825 - 
+2026-01-28T21:06:43.501573 - [34m[ComfyUI-RMBG][0m v[93m3.0.0[0m | [93m43 nodes[0m [92mLoaded[0m2026-01-28T21:06:43.501573 - 
+2026-01-28T21:06:43.685082 - [36;20m[C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_controlnet_aux] | INFO -> Using ckpts path: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_controlnet_aux\ckpts[0m
+2026-01-28T21:06:43.685082 - [36;20m[C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_controlnet_aux] | INFO -> Using symlinks: False[0m
+2026-01-28T21:06:43.685082 - [36;20m[C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_controlnet_aux] | INFO -> Using ort providers: ['CUDAExecutionProvider', 'DirectMLExecutionProvider', 'OpenVINOExecutionProvider', 'ROCMExecutionProvider', 'CPUExecutionProvider', 'CoreMLExecutionProvider'][0m
+2026-01-28T21:06:46.099642 - ('Looking for cached Spacy xx_sent_ud_sm.',)
+2026-01-28T21:06:46.588642 - [1;35m
+### [START] ComfyUI AlekPet Nodes [1;34mv1.0.92[0m[1;35m ###[0m2026-01-28T21:06:46.588642 - 
+2026-01-28T21:06:46.588642 - [92mNode -> ArgosTranslateNode: [93mArgosTranslateCLIPTextEncodeNode, ArgosTranslateTextNode[0m [92m[92m[Loading][0m[0m2026-01-28T21:06:46.588642 - 
+2026-01-28T21:06:46.588642 - [92mNode -> ChatGLMNode: [93mChatGLM4TranslateCLIPTextEncodeNode, ChatGLM4TranslateTextNode, ChatGLM4InstructNode, ChatGLM4InstructMediaNode, ChatGLMImageGenerateNode, ChatGLMVideoGenerateNode[0m [92m[92m[Loading][0m[0m2026-01-28T21:06:46.588642 - 
+2026-01-28T21:06:46.588642 - [92mNode -> DeepTranslatorNode: [93mDeepTranslatorCLIPTextEncodeNode, DeepTranslatorTextNode[0m [92m[92m[Loading][0m[0m2026-01-28T21:06:46.588642 - 
+2026-01-28T21:06:46.588642 - [92mNode -> ExtrasNode: [93mPreviewTextNode, HexToHueNode, ColorsCorrectNode[0m [92m[92m[Loading][0m[0m2026-01-28T21:06:46.588642 - 
+2026-01-28T21:06:46.588642 - [92mNode -> GoogleTranslateNode: [93mGoogleTranslateCLIPTextEncodeNode, GoogleTranslateTextNode[0m [92m[92m[Loading][0m[0m2026-01-28T21:06:46.588642 - 
+2026-01-28T21:06:46.588642 - [92mNode -> IDENode: [93mIDENode[0m [92m[92m[Loading][0m[0m2026-01-28T21:06:46.588642 - 
+2026-01-28T21:06:46.588642 - [92mNode -> PainterNode: [93mPainterNode[0m [92m[92m[Loading][0m[0m2026-01-28T21:06:46.588642 - 
+2026-01-28T21:06:46.588642 - [92mNode -> PoseNode: [93mPoseNode[0m [92m[92m[Loading][0m[0m2026-01-28T21:06:46.588642 - 
+2026-01-28T21:06:46.588642 - [1;35m### [END] ComfyUI AlekPet Nodes ###[0m2026-01-28T21:06:46.588642 - 
+2026-01-28T21:06:46.619421 - # 😺dzNodes: LayerStyle -> [1;33mCannot import name 'guidedFilter' from 'cv2.ximgproc'
 A few nodes cannot works properly, while most nodes are not affected. Please REINSTALL package 'opencv-contrib-python'.
-For detail refer to [4mhttps://github.com/chflame163/ComfyUI_LayerStyle/issues/5[0m[m2026-01-28T18:31:38.651069 - 
-2026-01-28T18:31:39.137061 - LLM配置加载成功，共加载 13 个模型
-2026-01-28T18:31:39.196918 - Traceback (most recent call last):
+For detail refer to [4mhttps://github.com/chflame163/ComfyUI_LayerStyle/issues/5[0m[m2026-01-28T21:06:46.619421 - 
+2026-01-28T21:06:47.083311 - LLM配置加载成功，共加载 13 个模型
+2026-01-28T21:06:47.135717 - Traceback (most recent call last):
   File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\nodes.py", line 2158, in load_custom_node
     module_spec.loader.exec_module(module)
   File "<frozen importlib._bootstrap_external>", line 999, in exec_module
@@ -322,131 +246,145 @@ For detail refer to [4mhttps://github.com/chflame163/ComfyUI_LayerStyle/issues/
     from cozy_comfyui import \
 ModuleNotFoundError: No module named 'cozy_comfyui'
 
-2026-01-28T18:31:39.197431 - Cannot import C:\Users\rafae\Documents\ComfyUI\custom_nodes\jovimetrix module for custom nodes: No module named 'cozy_comfyui'
-2026-01-28T18:31:39.291514 - [37m[1m[RemoveBackground_SET] Registering 15 node(s) for version 1.0.0.[0m
-2026-01-28T18:31:39.360448 - 
-2026-01-28T18:31:39.360448 - [92m[rgthree-comfy] Loaded 48 magnificent nodes. 🎉[0m2026-01-28T18:31:39.360448 - 
-2026-01-28T18:31:39.360448 - 
-2026-01-28T18:31:39.360448 - [33m[rgthree-comfy] ComfyUI's new Node 2.0 rendering may be incompatible with some rgthree-comfy nodes and features, breaking some rendering as well as losing the ability to access a node's properties (a vital part of many nodes). It also appears to run MUCH more slowly spiking CPU usage and causing jankiness and unresponsiveness, especially with large workflows. Personally I am not planning to use the new Nodes 2.0 and, unfortunately, am not able to invest the time to investigate and overhaul rgthree-comfy where needed. If you have issues when Nodes 2.0 is enabled, I'd urge you to switch it off as well and join me in hoping ComfyUI is not planning to deprecate the existing, stable canvas rendering all together.
-[0m2026-01-28T18:31:39.360448 - 
-2026-01-28T18:31:39.367036 - ComfyUI-GGUF: Allowing full torch compile
-2026-01-28T18:31:39.383228 - [92m[tinyterraNodes] [32mLoaded[0m2026-01-28T18:31:39.384229 - 
-2026-01-28T18:31:39.502584 - ComfyUI-GGUF: Allowing full torch compile
-2026-01-28T18:31:40.585343 - [34mWAS Node Suite: [0mOpenCV Python FFMPEG support is enabled[0m2026-01-28T18:31:40.585343 - 
-2026-01-28T18:31:40.585343 - [34mWAS Node Suite [93mWarning: [0m`ffmpeg_bin_path` is not set in `C:\Users\rafae\Documents\ComfyUI\custom_nodes\was-node-suite-comfyui\was_suite_config.json` config file. Will attempt to use system ffmpeg binaries if available.[0m2026-01-28T18:31:40.585343 - 
-2026-01-28T18:31:41.664158 - [34mWAS Node Suite: [0mFinished.[0m [32mLoaded[0m [0m220[0m [32mnodes successfully.[0m2026-01-28T18:31:41.664158 - 
-2026-01-28T18:31:41.664158 - 
-	[3m[93m"The future depends on what you do today."[0m[3m - Mahatma Gandhi[0m
-2026-01-28T18:31:41.664158 - 
-2026-01-28T18:31:41.679449 - Blocked by policy: C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\custom_nodes\ComfyUI-Manager
-2026-01-28T18:31:41.680463 - 
+2026-01-28T21:06:47.135717 - Cannot import C:\Users\rafae\Documents\ComfyUI\custom_nodes\jovimetrix module for custom nodes: No module named 'cozy_comfyui'
+2026-01-28T21:06:47.213140 - [37m[1m[RemoveBackground_SET] Registering 15 node(s) for version 1.0.0.[0m
+2026-01-28T21:06:47.275366 - 
+2026-01-28T21:06:47.275366 - [92m[rgthree-comfy] Loaded 48 magnificent nodes. 🎉[0m2026-01-28T21:06:47.275366 - 
+2026-01-28T21:06:47.275366 - 
+2026-01-28T21:06:47.275366 - [33m[rgthree-comfy] ComfyUI's new Node 2.0 rendering may be incompatible with some rgthree-comfy nodes and features, breaking some rendering as well as losing the ability to access a node's properties (a vital part of many nodes). It also appears to run MUCH more slowly spiking CPU usage and causing jankiness and unresponsiveness, especially with large workflows. Personally I am not planning to use the new Nodes 2.0 and, unfortunately, am not able to invest the time to investigate and overhaul rgthree-comfy where needed. If you have issues when Nodes 2.0 is enabled, I'd urge you to switch it off as well and join me in hoping ComfyUI is not planning to deprecate the existing, stable canvas rendering all together.
+[0m2026-01-28T21:06:47.275366 - 
+2026-01-28T21:06:47.281404 - ComfyUI-GGUF: Allowing full torch compile
+2026-01-28T21:06:47.295442 - [92m[tinyterraNodes] [32mLoaded[0m2026-01-28T21:06:47.295442 - 
+2026-01-28T21:06:47.388563 - ComfyUI-GGUF: Allowing full torch compile
+2026-01-28T21:06:48.501736 - [34mWAS Node Suite: [0mOpenCV Python FFMPEG support is enabled[0m2026-01-28T21:06:48.501736 - 
+2026-01-28T21:06:48.501736 - [34mWAS Node Suite [93mWarning: [0m`ffmpeg_bin_path` is not set in `C:\Users\rafae\Documents\ComfyUI\custom_nodes\was-node-suite-comfyui\was_suite_config.json` config file. Will attempt to use system ffmpeg binaries if available.[0m2026-01-28T21:06:48.501736 - 
+2026-01-28T21:06:49.605608 - [34mWAS Node Suite: [0mFinished.[0m [32mLoaded[0m [0m220[0m [32mnodes successfully.[0m2026-01-28T21:06:49.605608 - 
+2026-01-28T21:06:49.605608 - 
+	[3m[93m"Everything you've ever wanted is on the other side of fear."[0m[3m - George Addair[0m
+2026-01-28T21:06:49.605608 - 
+2026-01-28T21:06:49.620882 - Blocked by policy: C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\custom_nodes\ComfyUI-Manager
+2026-01-28T21:06:49.621893 - 
 Import times for custom nodes:
-2026-01-28T18:31:41.680463 -    0.0 seconds: C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\custom_nodes\websocket_image_save.py
-2026-01-28T18:31:41.680463 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-maskEditor-extension
-2026-01-28T18:31:41.680463 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mesh2motion
-2026-01-28T18:31:41.681488 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\Comfyui-Resolution-Master
-2026-01-28T18:31:41.681488 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mxtoolkit
-2026-01-28T18:31:41.681488 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\cg-use-everywhere
-2026-01-28T18:31:41.681488 -    0.0 seconds (IMPORT FAILED): C:\Users\rafae\Documents\ComfyUI\custom_nodes\jovimetrix
-2026-01-28T18:31:41.681488 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-qwenmultiangle
-2026-01-28T18:31:41.681488 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\ComfyUI_bnb_nf4_fp4_Loaders
-2026-01-28T18:31:41.681488 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\ComfyUI-GGUF
-2026-01-28T18:31:41.681488 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\chaosaiart-nodes
-2026-01-28T18:31:41.681488 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\kiko-prompt-builder
-2026-01-28T18:31:41.681488 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\ComfyUI-Align
-2026-01-28T18:31:41.682492 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\smartmodelloaders-mxd
-2026-01-28T18:31:41.682492 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_ipadapter_plus
-2026-01-28T18:31:41.682492 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\woohee-hf-loader
-2026-01-28T18:31:41.682492 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_ai_assistant
-2026-01-28T18:31:41.682492 -    0.0 seconds (IMPORT FAILED): C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-prompt-control
-2026-01-28T18:31:41.682492 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\Vantage-Nodes
-2026-01-28T18:31:41.682492 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_essentials
-2026-01-28T18:31:41.682492 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-flow-assistor
-2026-01-28T18:31:41.682492 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-advanced-controlnet
-2026-01-28T18:31:41.682492 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-multigpu
-2026-01-28T18:31:41.683497 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-ltx2-efficient
-2026-01-28T18:31:41.683497 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-curve
-2026-01-28T18:31:41.683497 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\removebackgroundsuite
-2026-01-28T18:31:41.683497 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-kjnodes
-2026-01-28T18:31:41.683497 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\rgthree-comfy
-2026-01-28T18:31:41.683497 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_birefnet_ll
-2026-01-28T18:31:41.683497 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-inspire-pack
-2026-01-28T18:31:41.683497 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_controlnet_aux
-2026-01-28T18:31:41.683497 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-easy-use
-2026-01-28T18:31:41.684501 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\remove-background
-2026-01-28T18:31:41.684501 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_layerstyle
-2026-01-28T18:31:41.684501 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\tinyterralynodes
-2026-01-28T18:31:41.684501 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-videohelpersuite
-2026-01-28T18:31:41.684501 -    0.2 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-impact-pack
-2026-01-28T18:31:41.684501 -    0.2 seconds (IMPORT FAILED): C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-controlnetaux
-2026-01-28T18:31:41.684501 -    0.3 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfy-mtb
-2026-01-28T18:31:41.684501 -    0.3 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-birefnet
-2026-01-28T18:31:41.684501 -    0.3 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\birefnet_universal
-2026-01-28T18:31:41.684501 -    0.4 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\ComfyUI_XISER_Nodes
-2026-01-28T18:31:41.685505 -    0.6 seconds (IMPORT FAILED): C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-anyline
-2026-01-28T18:31:41.685505 -    1.5 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg
-2026-01-28T18:31:41.685505 -    1.7 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\ComfyUI-Copilot
-2026-01-28T18:31:41.685505 -    2.2 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\was-node-suite-comfyui
-2026-01-28T18:31:41.685505 -    2.8 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mixlab-nodes
-2026-01-28T18:31:41.685505 -    3.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_custom_nodes_alekpet
-2026-01-28T18:31:41.685505 -    5.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-chord
-2026-01-28T18:31:41.685505 - 
-2026-01-28T18:31:41.689105 - Context impl SQLiteImpl.
-2026-01-28T18:31:41.689105 - Will assume non-transactional DDL.
-2026-01-28T18:31:41.812686 - Assets scan(roots=['models']) completed in 0.119s (created=0, skipped_existing=709, total_seen=709)
-2026-01-28T18:31:42.376999 - Starting server
+2026-01-28T21:06:49.621893 -    0.0 seconds: C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\custom_nodes\websocket_image_save.py
+2026-01-28T21:06:49.621893 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-maskEditor-extension
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mesh2motion
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\ComfyUI_bnb_nf4_fp4_Loaders
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\Comfyui-Resolution-Master
+2026-01-28T21:06:49.622399 -    0.0 seconds (IMPORT FAILED): C:\Users\rafae\Documents\ComfyUI\custom_nodes\jovimetrix
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mxtoolkit
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\cg-use-everywhere
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-qwenmultiangle
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\ComfyUI-Align
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\smartmodelloaders-mxd
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\ComfyUI-GGUF
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\chaosaiart-nodes
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\kiko-prompt-builder
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\woohee-hf-loader
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_ipadapter_plus
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\Vantage-Nodes
+2026-01-28T21:06:49.622399 -    0.0 seconds (IMPORT FAILED): C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-prompt-control
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_ai_assistant
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_essentials
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_patches_ll
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-flow-assistor
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-multigpu
+2026-01-28T21:06:49.622399 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\removebackgroundsuite
+2026-01-28T21:06:49.623903 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-advanced-controlnet
+2026-01-28T21:06:49.623903 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-curve
+2026-01-28T21:06:49.623903 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-ltx2-efficient
+2026-01-28T21:06:49.623903 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-kjnodes
+2026-01-28T21:06:49.623903 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\rgthree-comfy
+2026-01-28T21:06:49.623903 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_birefnet_ll
+2026-01-28T21:06:49.624422 -    0.0 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_controlnet_aux
+2026-01-28T21:06:49.624422 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-inspire-pack
+2026-01-28T21:06:49.624422 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\remove-background
+2026-01-28T21:06:49.624422 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-easy-use
+2026-01-28T21:06:49.624422 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\tinyterralynodes
+2026-01-28T21:06:49.624422 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-videohelpersuite
+2026-01-28T21:06:49.624422 -    0.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_layerstyle
+2026-01-28T21:06:49.624422 -    0.2 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-impact-pack
+2026-01-28T21:06:49.624422 -    0.2 seconds (IMPORT FAILED): C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-controlnetaux
+2026-01-28T21:06:49.624422 -    0.3 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfy-mtb
+2026-01-28T21:06:49.624422 -    0.3 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-birefnet
+2026-01-28T21:06:49.624422 -    0.4 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\ComfyUI_XISER_Nodes
+2026-01-28T21:06:49.624422 -    0.4 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\birefnet_universal
+2026-01-28T21:06:49.624422 -    0.6 seconds (IMPORT FAILED): C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-anyline
+2026-01-28T21:06:49.624422 -    1.3 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-rmbg
+2026-01-28T21:06:49.625482 -    1.8 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\ComfyUI-Copilot
+2026-01-28T21:06:49.625482 -    2.2 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\was-node-suite-comfyui
+2026-01-28T21:06:49.625482 -    2.6 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mixlab-nodes
+2026-01-28T21:06:49.625482 -    2.9 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui_custom_nodes_alekpet
+2026-01-28T21:06:49.625482 -    5.1 seconds: C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-chord
+2026-01-28T21:06:49.625482 - 
+2026-01-28T21:06:49.630536 - Context impl SQLiteImpl.
+2026-01-28T21:06:49.630536 - Will assume non-transactional DDL.
+2026-01-28T21:06:49.734113 - Assets scan(roots=['models']) completed in 0.099s (created=0, skipped_existing=709, total_seen=709)
+2026-01-28T21:06:49.840949 - Starting server
 
-2026-01-28T18:31:42.378103 - To see the GUI go to: http://127.0.0.1:8000
-2026-01-28T18:31:43.217558 - [36;20m[C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfy-mtb] | INFO -> Found multiple match, we will pick the last C:\Users\rafae\Documents\ComfyUI\models\upscale_models
+2026-01-28T21:06:49.842465 - To see the GUI go to: http://127.0.0.1:8002
+2026-01-28T21:06:51.158834 - comfyui-frontend-package not found in requirements.txt
+2026-01-28T21:06:52.460095 - [DEPRECATION WARNING] Detected import of deprecated legacy API: /scripts/ui.js. This is likely caused by a custom node extension using outdated APIs. Please update your extensions or contact the extension author for an updated version.
+2026-01-28T21:06:52.463160 - [DEPRECATION WARNING] Detected import of deprecated legacy API: /extensions/core/clipspace.js. This is likely caused by a custom node extension using outdated APIs. Please update your extensions or contact the extension author for an updated version.
+2026-01-28T21:06:52.465671 - C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/photoswipe-lightbox.esm.min.js2026-01-28T21:06:52.466819 - 
+2026-01-28T21:06:52.467824 - [DEPRECATION WARNING] Detected import of deprecated legacy API: /extensions/core/groupNode.js. This is likely caused by a custom node extension using outdated APIs. Please update your extensions or contact the extension author for an updated version.
+2026-01-28T21:06:52.468827 - [DEPRECATION WARNING] Detected import of deprecated legacy API: /extensions/core/widgetInputs.js. This is likely caused by a custom node extension using outdated APIs. Please update your extensions or contact the extension author for an updated version.
+2026-01-28T21:06:52.538683 - C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/pickr.min.js2026-01-28T21:06:52.538683 - 
+2026-01-28T21:06:52.555787 - C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/photoswipe.min.css2026-01-28T21:06:52.555787 - 
+2026-01-28T21:06:52.576862 - [ComfyUI-Manager] The ComfyRegistry cache update is still in progress, so an outdated cache is being used.
+2026-01-28T21:06:52.846949 - FETCH DATA from: C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\comfyui_manager\custom-node-list.json2026-01-28T21:06:52.846949 - 2026-01-28T21:06:52.875417 -  [DONE]2026-01-28T21:06:52.875417 - 
+2026-01-28T21:06:53.418150 - C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/classic.min.css2026-01-28T21:06:53.418150 - 
+2026-01-28T21:06:53.621244 - [36;20m[C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfy-mtb] | INFO -> Found multiple match, we will pick the last C:\Users\rafae\Documents\ComfyUI\models\upscale_models
 ['K:\\ComfyUI\\models\\upscale_models', 'C:\\Users\\rafae\\Documents\\ComfyUI\\models\\upscale_models'][0m
-2026-01-28T18:31:52.515924 - [ComfyUI-Manager] The ComfyRegistry cache update is still in progress, so an outdated cache is being used.
-2026-01-28T18:31:52.663118 - FETCH DATA from: C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\comfyui_manager\custom-node-list.json2026-01-28T18:31:52.663118 - 2026-01-28T18:31:52.692308 -  [DONE]2026-01-28T18:31:52.692308 - 
-2026-01-28T18:33:04.774692 - FETCH ComfyRegistry Data [DONE]
-2026-01-28T18:33:05.145645 - [ComfyUI-Manager] default cache updated: https://api.comfy.org/nodes
-2026-01-28T18:33:05.233395 - FETCH DATA from: C:\Users\rafae\Documents\ComfyUI\user\__manager\cache\1514988643_custom-node-list.json2026-01-28T18:33:05.233395 - 2026-01-28T18:33:05.268283 -  [DONE]2026-01-28T18:33:05.268283 - 
-2026-01-28T18:33:05.351347 - [ComfyUI-Manager] All startup tasks have been completed.
-2026-01-28T18:34:07.386400 - got prompt
-2026-01-28T18:34:09.636776 - VAE load device: cuda:0, offload device: cpu, dtype: torch.float32
-2026-01-28T18:34:10.011819 - Requested to load VideoVAE
-2026-01-28T18:34:11.088880 - loaded partially; 3672.80 MB usable, 3348.73 MB loaded, 1314.66 MB offloaded, 324.01 MB buffer reserved, lowvram patches: 0
-2026-01-28T18:34:25.693370 - gguf qtypes: F32 (289), Q6_K (49), Q5_K (288)
-2026-01-28T18:34:25.901521 - Attempting to recreate sentencepiece tokenizer from GGUF file metadata...
-2026-01-28T18:34:40.626945 - Created tokenizer with vocab size of 262208
-2026-01-28T18:34:41.314185 - Dequantizing token_embd.weight to prevent runtime OOM.
-2026-01-28T18:34:45.027811 - [MultiGPU Core Patching] text_encoder_device_patched returning device: cuda:0 (current_text_encoder_device=cuda:0)
-2026-01-28T18:34:45.717678 - clip missing: ['multi_modal_projector.mm_input_projection_weight', 'multi_modal_projector.mm_soft_emb_norm.weight', 'vision_model.embeddings.patch_embedding.weight', 'vision_model.embeddings.patch_embedding.bias', 'vision_model.embeddings.position_embedding.weight', 'vision_model.encoder.layers.0.layer_norm1.weight', 'vision_model.encoder.layers.0.layer_norm1.bias', 'vision_model.encoder.layers.0.self_attn.q_proj.weight', 'vision_model.encoder.layers.0.self_attn.k_proj.weight', 'vision_model.encoder.layers.0.self_attn.v_proj.weight', 'vision_model.encoder.layers.0.self_attn.out_proj.weight', 'vision_model.encoder.layers.0.layer_norm2.weight', 'vision_model.encoder.layers.0.layer_norm2.bias', 'vision_model.encoder.layers.0.mlp.fc1.weight', 'vision_model.encoder.layers.0.mlp.fc2.weight', 'vision_model.encoder.layers.1.layer_norm1.weight', 'vision_model.encoder.layers.1.layer_norm1.bias', 'vision_model.encoder.layers.1.self_attn.q_proj.weight', 'vision_model.encoder.layers.1.self_attn.k_proj.weight', 'vision_model.encoder.layers.1.self_attn.v_proj.weight', 'vision_model.encoder.layers.1.self_attn.out_proj.weight', 'vision_model.encoder.layers.1.layer_norm2.weight', 'vision_model.encoder.layers.1.layer_norm2.bias', 'vision_model.encoder.layers.1.mlp.fc1.weight', 'vision_model.encoder.layers.1.mlp.fc2.weight', 'vision_model.encoder.layers.2.layer_norm1.weight', 'vision_model.encoder.layers.2.layer_norm1.bias', 'vision_model.encoder.layers.2.self_attn.q_proj.weight', 'vision_model.encoder.layers.2.self_attn.k_proj.weight', 'vision_model.encoder.layers.2.self_attn.v_proj.weight', 'vision_model.encoder.layers.2.self_attn.out_proj.weight', 'vision_model.encoder.layers.2.layer_norm2.weight', 'vision_model.encoder.layers.2.layer_norm2.bias', 'vision_model.encoder.layers.2.mlp.fc1.weight', 'vision_model.encoder.layers.2.mlp.fc2.weight', 'vision_model.encoder.layers.3.layer_norm1.weight', 'vision_model.encoder.layers.3.layer_norm1.bias', 'vision_model.encoder.layers.3.self_attn.q_proj.weight', 'vision_model.encoder.layers.3.self_attn.k_proj.weight', 'vision_model.encoder.layers.3.self_attn.v_proj.weight', 'vision_model.encoder.layers.3.self_attn.out_proj.weight', 'vision_model.encoder.layers.3.layer_norm2.weight', 'vision_model.encoder.layers.3.layer_norm2.bias', 'vision_model.encoder.layers.3.mlp.fc1.weight', 'vision_model.encoder.layers.3.mlp.fc2.weight', 'vision_model.encoder.layers.4.layer_norm1.weight', 'vision_model.encoder.layers.4.layer_norm1.bias', 'vision_model.encoder.layers.4.self_attn.q_proj.weight', 'vision_model.encoder.layers.4.self_attn.k_proj.weight', 'vision_model.encoder.layers.4.self_attn.v_proj.weight', 'vision_model.encoder.layers.4.self_attn.out_proj.weight', 'vision_model.encoder.layers.4.layer_norm2.weight', 'vision_model.encoder.layers.4.layer_norm2.bias', 'vision_model.encoder.layers.4.mlp.fc1.weight', 'vision_model.encoder.layers.4.mlp.fc2.weight', 'vision_model.encoder.layers.5.layer_norm1.weight', 'vision_model.encoder.layers.5.layer_norm1.bias', 'vision_model.encoder.layers.5.self_attn.q_proj.weight', 'vision_model.encoder.layers.5.self_attn.k_proj.weight', 'vision_model.encoder.layers.5.self_attn.v_proj.weight', 'vision_model.encoder.layers.5.self_attn.out_proj.weight', 'vision_model.encoder.layers.5.layer_norm2.weight', 'vision_model.encoder.layers.5.layer_norm2.bias', 'vision_model.encoder.layers.5.mlp.fc1.weight', 'vision_model.encoder.layers.5.mlp.fc2.weight', 'vision_model.encoder.layers.6.layer_norm1.weight', 'vision_model.encoder.layers.6.layer_norm1.bias', 'vision_model.encoder.layers.6.self_attn.q_proj.weight', 'vision_model.encoder.layers.6.self_attn.k_proj.weight', 'vision_model.encoder.layers.6.self_attn.v_proj.weight', 'vision_model.encoder.layers.6.self_attn.out_proj.weight', 'vision_model.encoder.layers.6.layer_norm2.weight', 'vision_model.encoder.layers.6.layer_norm2.bias', 'vision_model.encoder.layers.6.mlp.fc1.weight', 'vision_model.encoder.layers.6.mlp.fc2.weight', 'vision_model.encoder.layers.7.layer_norm1.weight', 'vision_model.encoder.layers.7.layer_norm1.bias', 'vision_model.encoder.layers.7.self_attn.q_proj.weight', 'vision_model.encoder.layers.7.self_attn.k_proj.weight', 'vision_model.encoder.layers.7.self_attn.v_proj.weight', 'vision_model.encoder.layers.7.self_attn.out_proj.weight', 'vision_model.encoder.layers.7.layer_norm2.weight', 'vision_model.encoder.layers.7.layer_norm2.bias', 'vision_model.encoder.layers.7.mlp.fc1.weight', 'vision_model.encoder.layers.7.mlp.fc2.weight', 'vision_model.encoder.layers.8.layer_norm1.weight', 'vision_model.encoder.layers.8.layer_norm1.bias', 'vision_model.encoder.layers.8.self_attn.q_proj.weight', 'vision_model.encoder.layers.8.self_attn.k_proj.weight', 'vision_model.encoder.layers.8.self_attn.v_proj.weight', 'vision_model.encoder.layers.8.self_attn.out_proj.weight', 'vision_model.encoder.layers.8.layer_norm2.weight', 'vision_model.encoder.layers.8.layer_norm2.bias', 'vision_model.encoder.layers.8.mlp.fc1.weight', 'vision_model.encoder.layers.8.mlp.fc2.weight', 'vision_model.encoder.layers.9.layer_norm1.weight', 'vision_model.encoder.layers.9.layer_norm1.bias', 'vision_model.encoder.layers.9.self_attn.q_proj.weight', 'vision_model.encoder.layers.9.self_attn.k_proj.weight', 'vision_model.encoder.layers.9.self_attn.v_proj.weight', 'vision_model.encoder.layers.9.self_attn.out_proj.weight', 'vision_model.encoder.layers.9.layer_norm2.weight', 'vision_model.encoder.layers.9.layer_norm2.bias', 'vision_model.encoder.layers.9.mlp.fc1.weight', 'vision_model.encoder.layers.9.mlp.fc2.weight', 'vision_model.encoder.layers.10.layer_norm1.weight', 'vision_model.encoder.layers.10.layer_norm1.bias', 'vision_model.encoder.layers.10.self_attn.q_proj.weight', 'vision_model.encoder.layers.10.self_attn.k_proj.weight', 'vision_model.encoder.layers.10.self_attn.v_proj.weight', 'vision_model.encoder.layers.10.self_attn.out_proj.weight', 'vision_model.encoder.layers.10.layer_norm2.weight', 'vision_model.encoder.layers.10.layer_norm2.bias', 'vision_model.encoder.layers.10.mlp.fc1.weight', 'vision_model.encoder.layers.10.mlp.fc2.weight', 'vision_model.encoder.layers.11.layer_norm1.weight', 'vision_model.encoder.layers.11.layer_norm1.bias', 'vision_model.encoder.layers.11.self_attn.q_proj.weight', 'vision_model.encoder.layers.11.self_attn.k_proj.weight', 'vision_model.encoder.layers.11.self_attn.v_proj.weight', 'vision_model.encoder.layers.11.self_attn.out_proj.weight', 'vision_model.encoder.layers.11.layer_norm2.weight', 'vision_model.encoder.layers.11.layer_norm2.bias', 'vision_model.encoder.layers.11.mlp.fc1.weight', 'vision_model.encoder.layers.11.mlp.fc2.weight', 'vision_model.encoder.layers.12.layer_norm1.weight', 'vision_model.encoder.layers.12.layer_norm1.bias', 'vision_model.encoder.layers.12.self_attn.q_proj.weight', 'vision_model.encoder.layers.12.self_attn.k_proj.weight', 'vision_model.encoder.layers.12.self_attn.v_proj.weight', 'vision_model.encoder.layers.12.self_attn.out_proj.weight', 'vision_model.encoder.layers.12.layer_norm2.weight', 'vision_model.encoder.layers.12.layer_norm2.bias', 'vision_model.encoder.layers.12.mlp.fc1.weight', 'vision_model.encoder.layers.12.mlp.fc2.weight', 'vision_model.encoder.layers.13.layer_norm1.weight', 'vision_model.encoder.layers.13.layer_norm1.bias', 'vision_model.encoder.layers.13.self_attn.q_proj.weight', 'vision_model.encoder.layers.13.self_attn.k_proj.weight', 'vision_model.encoder.layers.13.self_attn.v_proj.weight', 'vision_model.encoder.layers.13.self_attn.out_proj.weight', 'vision_model.encoder.layers.13.layer_norm2.weight', 'vision_model.encoder.layers.13.layer_norm2.bias', 'vision_model.encoder.layers.13.mlp.fc1.weight', 'vision_model.encoder.layers.13.mlp.fc2.weight', 'vision_model.encoder.layers.14.layer_norm1.weight', 'vision_model.encoder.layers.14.layer_norm1.bias', 'vision_model.encoder.layers.14.self_attn.q_proj.weight', 'vision_model.encoder.layers.14.self_attn.k_proj.weight', 'vision_model.encoder.layers.14.self_attn.v_proj.weight', 'vision_model.encoder.layers.14.self_attn.out_proj.weight', 'vision_model.encoder.layers.14.layer_norm2.weight', 'vision_model.encoder.layers.14.layer_norm2.bias', 'vision_model.encoder.layers.14.mlp.fc1.weight', 'vision_model.encoder.layers.14.mlp.fc2.weight', 'vision_model.encoder.layers.15.layer_norm1.weight', 'vision_model.encoder.layers.15.layer_norm1.bias', 'vision_model.encoder.layers.15.self_attn.q_proj.weight', 'vision_model.encoder.layers.15.self_attn.k_proj.weight', 'vision_model.encoder.layers.15.self_attn.v_proj.weight', 'vision_model.encoder.layers.15.self_attn.out_proj.weight', 'vision_model.encoder.layers.15.layer_norm2.weight', 'vision_model.encoder.layers.15.layer_norm2.bias', 'vision_model.encoder.layers.15.mlp.fc1.weight', 'vision_model.encoder.layers.15.mlp.fc2.weight', 'vision_model.encoder.layers.16.layer_norm1.weight', 'vision_model.encoder.layers.16.layer_norm1.bias', 'vision_model.encoder.layers.16.self_attn.q_proj.weight', 'vision_model.encoder.layers.16.self_attn.k_proj.weight', 'vision_model.encoder.layers.16.self_attn.v_proj.weight', 'vision_model.encoder.layers.16.self_attn.out_proj.weight', 'vision_model.encoder.layers.16.layer_norm2.weight', 'vision_model.encoder.layers.16.layer_norm2.bias', 'vision_model.encoder.layers.16.mlp.fc1.weight', 'vision_model.encoder.layers.16.mlp.fc2.weight', 'vision_model.encoder.layers.17.layer_norm1.weight', 'vision_model.encoder.layers.17.layer_norm1.bias', 'vision_model.encoder.layers.17.self_attn.q_proj.weight', 'vision_model.encoder.layers.17.self_attn.k_proj.weight', 'vision_model.encoder.layers.17.self_attn.v_proj.weight', 'vision_model.encoder.layers.17.self_attn.out_proj.weight', 'vision_model.encoder.layers.17.layer_norm2.weight', 'vision_model.encoder.layers.17.layer_norm2.bias', 'vision_model.encoder.layers.17.mlp.fc1.weight', 'vision_model.encoder.layers.17.mlp.fc2.weight', 'vision_model.encoder.layers.18.layer_norm1.weight', 'vision_model.encoder.layers.18.layer_norm1.bias', 'vision_model.encoder.layers.18.self_attn.q_proj.weight', 'vision_model.encoder.layers.18.self_attn.k_proj.weight', 'vision_model.encoder.layers.18.self_attn.v_proj.weight', 'vision_model.encoder.layers.18.self_attn.out_proj.weight', 'vision_model.encoder.layers.18.layer_norm2.weight', 'vision_model.encoder.layers.18.layer_norm2.bias', 'vision_model.encoder.layers.18.mlp.fc1.weight', 'vision_model.encoder.layers.18.mlp.fc2.weight', 'vision_model.encoder.layers.19.layer_norm1.weight', 'vision_model.encoder.layers.19.layer_norm1.bias', 'vision_model.encoder.layers.19.self_attn.q_proj.weight', 'vision_model.encoder.layers.19.self_attn.k_proj.weight', 'vision_model.encoder.layers.19.self_attn.v_proj.weight', 'vision_model.encoder.layers.19.self_attn.out_proj.weight', 'vision_model.encoder.layers.19.layer_norm2.weight', 'vision_model.encoder.layers.19.layer_norm2.bias', 'vision_model.encoder.layers.19.mlp.fc1.weight', 'vision_model.encoder.layers.19.mlp.fc2.weight', 'vision_model.encoder.layers.20.layer_norm1.weight', 'vision_model.encoder.layers.20.layer_norm1.bias', 'vision_model.encoder.layers.20.self_attn.q_proj.weight', 'vision_model.encoder.layers.20.self_attn.k_proj.weight', 'vision_model.encoder.layers.20.self_attn.v_proj.weight', 'vision_model.encoder.layers.20.self_attn.out_proj.weight', 'vision_model.encoder.layers.20.layer_norm2.weight', 'vision_model.encoder.layers.20.layer_norm2.bias', 'vision_model.encoder.layers.20.mlp.fc1.weight', 'vision_model.encoder.layers.20.mlp.fc2.weight', 'vision_model.encoder.layers.21.layer_norm1.weight', 'vision_model.encoder.layers.21.layer_norm1.bias', 'vision_model.encoder.layers.21.self_attn.q_proj.weight', 'vision_model.encoder.layers.21.self_attn.k_proj.weight', 'vision_model.encoder.layers.21.self_attn.v_proj.weight', 'vision_model.encoder.layers.21.self_attn.out_proj.weight', 'vision_model.encoder.layers.21.layer_norm2.weight', 'vision_model.encoder.layers.21.layer_norm2.bias', 'vision_model.encoder.layers.21.mlp.fc1.weight', 'vision_model.encoder.layers.21.mlp.fc2.weight', 'vision_model.encoder.layers.22.layer_norm1.weight', 'vision_model.encoder.layers.22.layer_norm1.bias', 'vision_model.encoder.layers.22.self_attn.q_proj.weight', 'vision_model.encoder.layers.22.self_attn.k_proj.weight', 'vision_model.encoder.layers.22.self_attn.v_proj.weight', 'vision_model.encoder.layers.22.self_attn.out_proj.weight', 'vision_model.encoder.layers.22.layer_norm2.weight', 'vision_model.encoder.layers.22.layer_norm2.bias', 'vision_model.encoder.layers.22.mlp.fc1.weight', 'vision_model.encoder.layers.22.mlp.fc2.weight', 'vision_model.encoder.layers.23.layer_norm1.weight', 'vision_model.encoder.layers.23.layer_norm1.bias', 'vision_model.encoder.layers.23.self_attn.q_proj.weight', 'vision_model.encoder.layers.23.self_attn.k_proj.weight', 'vision_model.encoder.layers.23.self_attn.v_proj.weight', 'vision_model.encoder.layers.23.self_attn.out_proj.weight', 'vision_model.encoder.layers.23.layer_norm2.weight', 'vision_model.encoder.layers.23.layer_norm2.bias', 'vision_model.encoder.layers.23.mlp.fc1.weight', 'vision_model.encoder.layers.23.mlp.fc2.weight', 'vision_model.encoder.layers.24.layer_norm1.weight', 'vision_model.encoder.layers.24.layer_norm1.bias', 'vision_model.encoder.layers.24.self_attn.q_proj.weight', 'vision_model.encoder.layers.24.self_attn.k_proj.weight', 'vision_model.encoder.layers.24.self_attn.v_proj.weight', 'vision_model.encoder.layers.24.self_attn.out_proj.weight', 'vision_model.encoder.layers.24.layer_norm2.weight', 'vision_model.encoder.layers.24.layer_norm2.bias', 'vision_model.encoder.layers.24.mlp.fc1.weight', 'vision_model.encoder.layers.24.mlp.fc2.weight', 'vision_model.encoder.layers.25.layer_norm1.weight', 'vision_model.encoder.layers.25.layer_norm1.bias', 'vision_model.encoder.layers.25.self_attn.q_proj.weight', 'vision_model.encoder.layers.25.self_attn.k_proj.weight', 'vision_model.encoder.layers.25.self_attn.v_proj.weight', 'vision_model.encoder.layers.25.self_attn.out_proj.weight', 'vision_model.encoder.layers.25.layer_norm2.weight', 'vision_model.encoder.layers.25.layer_norm2.bias', 'vision_model.encoder.layers.25.mlp.fc1.weight', 'vision_model.encoder.layers.25.mlp.fc2.weight', 'vision_model.encoder.layers.26.layer_norm1.weight', 'vision_model.encoder.layers.26.layer_norm1.bias', 'vision_model.encoder.layers.26.self_attn.q_proj.weight', 'vision_model.encoder.layers.26.self_attn.k_proj.weight', 'vision_model.encoder.layers.26.self_attn.v_proj.weight', 'vision_model.encoder.layers.26.self_attn.out_proj.weight', 'vision_model.encoder.layers.26.layer_norm2.weight', 'vision_model.encoder.layers.26.layer_norm2.bias', 'vision_model.encoder.layers.26.mlp.fc1.weight', 'vision_model.encoder.layers.26.mlp.fc2.weight', 'vision_model.post_layernorm.weight', 'vision_model.post_layernorm.bias']
-2026-01-28T18:34:45.742885 - CLIP/text encoder model load device: cuda:0, offload device: cpu, current: cpu, dtype: torch.float16
-2026-01-28T18:34:45.775301 - Requested to load LTXAVTEModel_
-2026-01-28T18:35:03.400364 - loaded partially; 2846.00 MB usable, 0.00 MB loaded, 13495.11 MB offloaded, 7252.06 MB buffer reserved, lowvram patches: 0
-2026-01-28T18:35:03.402626 - Attempting to release mmap (290)
-2026-01-28T18:35:11.200326 - gguf qtypes: F32 (728), BF16 (7), Q5_K (336), Q6_K (144)
-2026-01-28T18:35:11.274040 - model weight dtype torch.bfloat16, manual cast: torch.float32
-2026-01-28T18:35:11.275554 - model_type FLUX
-2026-01-28T18:35:11.400420 - [LTX2Pro] Patched model forward() for attention_mask & 3D latents (with AV split support)2026-01-28T18:35:11.401505 - 
-2026-01-28T18:35:11.401505 - [LTX2Pro] 🎵 Audio-Video mode (NestedTensor detected)2026-01-28T18:35:11.401505 - 
-2026-01-28T18:35:11.401505 - [LTX2Pro] Latent shape: torch.Size([1, 128, 4, 8, 12])2026-01-28T18:35:11.401505 - 
-2026-01-28T18:35:11.402506 - [LTX2Pro] Using external sigmas2026-01-28T18:35:11.402506 - 
-2026-01-28T18:35:11.402506 - [LTX2Pro] Sigma range: 1.0000 -> 0.0000, steps: 192026-01-28T18:35:11.402506 - 
-2026-01-28T18:35:11.404015 - [LTX2Pro] Set frame_rate=25.02026-01-28T18:35:11.404015 - 
-2026-01-28T18:35:11.404015 - [LTX2Pro] Preset: Quality - Cool (RTX 2060 6GB)2026-01-28T18:35:11.404015 - 
-2026-01-28T18:35:11.404015 - [LTX2Pro] -> freeze_ratio=0.25, throttle_delay=100ms2026-01-28T18:35:11.405036 - 
-2026-01-28T18:35:11.406595 - [FFNChunking] Wrapped 48 FFN modules with 8 chunks2026-01-28T18:35:11.406595 - 
-2026-01-28T18:35:11.406595 - [FFNChunking] Estimated peak FFN VRAM reduction: ~8x2026-01-28T18:35:11.407896 - 
-2026-01-28T18:35:11.407896 - [LTX2Pro] ⚠️ Audio-Video Mode: Disabling input noise_mask to prevent patchifier crash.2026-01-28T18:35:11.407896 - 
-2026-01-28T18:35:11.407896 - [LTX2Pro]    (CFGGuider will generate a compatible default mask)2026-01-28T18:35:11.407896 - 
-2026-01-28T18:35:11.547912 - [LTX2Pro] 🚀 Starting sampling (19 steps)...2026-01-28T18:35:11.548913 - 
-2026-01-28T18:35:11.549417 - Requested to load LTXV
-2026-01-28T18:35:11.873785 - 0 models unloaded.
-2026-01-28T18:35:27.718106 - loaded partially; 0.00 MB usable, 0.00 MB loaded, 9555.42 MB offloaded, 1257.12 MB buffer reserved, lowvram patches: 0
-2026-01-28T18:35:27.806535 - 
-  0%|          | 0/19 [00:00<?, ?it/s]2026-01-28T18:35:27.832846 - [LTX2Pro] DEBUG: Model Class: LTXVModel2026-01-28T18:35:27.833851 - 
-2026-01-28T18:35:27.833851 - [LTX2Pro] DEBUG: In Channels: 1282026-01-28T18:35:27.833851 - 
-2026-01-28T18:35:27.833851 - [LTX2Pro] DEBUG: Audio In Channels: N/A2026-01-28T18:35:27.833851 - 
-2026-01-28T18:35:28.146558 - 
-  0%|          | 0/19 [00:00<?, ?it/s]2026-01-28T18:35:28.146558 - 
-2026-01-28T18:35:28.146558 - [FFNChunking] Restored 48 original FFN modules2026-01-28T18:35:28.147698 - 
-2026-01-28T18:35:28.159114 - !!! Exception during processing !!! mat1 and mat2 shapes cannot be multiplied (1024x7680 and 4096x4096)
-2026-01-28T18:35:28.297031 - Traceback (most recent call last):
+2026-01-28T21:06:53.846904 - C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/model-viewer.min.js2026-01-28T21:06:53.846904 - 
+2026-01-28T21:06:53.856885 - C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/juxtapose.css2026-01-28T21:06:53.856885 - 
+2026-01-28T21:06:53.886034 - C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-mixlab-nodes\webApp\lib/juxtapose.min.js2026-01-28T21:06:53.886034 - 
+2026-01-28T21:08:08.036542 - FETCH ComfyRegistry Data [DONE]
+2026-01-28T21:08:08.315909 - [ComfyUI-Manager] default cache updated: https://api.comfy.org/nodes
+2026-01-28T21:08:08.390384 - FETCH DATA from: C:\Users\rafae\Documents\ComfyUI\user\__manager\cache\1514988643_custom-node-list.json2026-01-28T21:08:08.390384 - 2026-01-28T21:08:08.424771 -  [DONE]2026-01-28T21:08:08.425788 - 
+2026-01-28T21:08:08.486982 - [ComfyUI-Manager] All startup tasks have been completed.
+2026-01-28T21:08:35.699490 - got prompt
+2026-01-28T21:08:37.074533 - VAE load device: cuda:0, offload device: cpu, dtype: torch.float32
+2026-01-28T21:08:37.561824 - Requested to load VideoVAE
+2026-01-28T21:08:38.653961 - loaded partially; 3672.80 MB usable, 3348.73 MB loaded, 1314.66 MB offloaded, 324.01 MB buffer reserved, lowvram patches: 0
+2026-01-28T21:08:55.418795 - gguf qtypes: F32 (289), Q6_K (49), Q5_K (288)
+2026-01-28T21:08:55.697075 - Attempting to recreate sentencepiece tokenizer from GGUF file metadata...
+2026-01-28T21:09:12.591572 - Created tokenizer with vocab size of 262208
+2026-01-28T21:09:13.325008 - Dequantizing token_embd.weight to prevent runtime OOM.
+2026-01-28T21:09:17.229394 - [MultiGPU Core Patching] text_encoder_device_patched returning device: cuda:0 (current_text_encoder_device=cuda:0)
+2026-01-28T21:09:17.918386 - clip missing: ['multi_modal_projector.mm_input_projection_weight', 'multi_modal_projector.mm_soft_emb_norm.weight', 'vision_model.embeddings.patch_embedding.weight', 'vision_model.embeddings.patch_embedding.bias', 'vision_model.embeddings.position_embedding.weight', 'vision_model.encoder.layers.0.layer_norm1.weight', 'vision_model.encoder.layers.0.layer_norm1.bias', 'vision_model.encoder.layers.0.self_attn.q_proj.weight', 'vision_model.encoder.layers.0.self_attn.k_proj.weight', 'vision_model.encoder.layers.0.self_attn.v_proj.weight', 'vision_model.encoder.layers.0.self_attn.out_proj.weight', 'vision_model.encoder.layers.0.layer_norm2.weight', 'vision_model.encoder.layers.0.layer_norm2.bias', 'vision_model.encoder.layers.0.mlp.fc1.weight', 'vision_model.encoder.layers.0.mlp.fc2.weight', 'vision_model.encoder.layers.1.layer_norm1.weight', 'vision_model.encoder.layers.1.layer_norm1.bias', 'vision_model.encoder.layers.1.self_attn.q_proj.weight', 'vision_model.encoder.layers.1.self_attn.k_proj.weight', 'vision_model.encoder.layers.1.self_attn.v_proj.weight', 'vision_model.encoder.layers.1.self_attn.out_proj.weight', 'vision_model.encoder.layers.1.layer_norm2.weight', 'vision_model.encoder.layers.1.layer_norm2.bias', 'vision_model.encoder.layers.1.mlp.fc1.weight', 'vision_model.encoder.layers.1.mlp.fc2.weight', 'vision_model.encoder.layers.2.layer_norm1.weight', 'vision_model.encoder.layers.2.layer_norm1.bias', 'vision_model.encoder.layers.2.self_attn.q_proj.weight', 'vision_model.encoder.layers.2.self_attn.k_proj.weight', 'vision_model.encoder.layers.2.self_attn.v_proj.weight', 'vision_model.encoder.layers.2.self_attn.out_proj.weight', 'vision_model.encoder.layers.2.layer_norm2.weight', 'vision_model.encoder.layers.2.layer_norm2.bias', 'vision_model.encoder.layers.2.mlp.fc1.weight', 'vision_model.encoder.layers.2.mlp.fc2.weight', 'vision_model.encoder.layers.3.layer_norm1.weight', 'vision_model.encoder.layers.3.layer_norm1.bias', 'vision_model.encoder.layers.3.self_attn.q_proj.weight', 'vision_model.encoder.layers.3.self_attn.k_proj.weight', 'vision_model.encoder.layers.3.self_attn.v_proj.weight', 'vision_model.encoder.layers.3.self_attn.out_proj.weight', 'vision_model.encoder.layers.3.layer_norm2.weight', 'vision_model.encoder.layers.3.layer_norm2.bias', 'vision_model.encoder.layers.3.mlp.fc1.weight', 'vision_model.encoder.layers.3.mlp.fc2.weight', 'vision_model.encoder.layers.4.layer_norm1.weight', 'vision_model.encoder.layers.4.layer_norm1.bias', 'vision_model.encoder.layers.4.self_attn.q_proj.weight', 'vision_model.encoder.layers.4.self_attn.k_proj.weight', 'vision_model.encoder.layers.4.self_attn.v_proj.weight', 'vision_model.encoder.layers.4.self_attn.out_proj.weight', 'vision_model.encoder.layers.4.layer_norm2.weight', 'vision_model.encoder.layers.4.layer_norm2.bias', 'vision_model.encoder.layers.4.mlp.fc1.weight', 'vision_model.encoder.layers.4.mlp.fc2.weight', 'vision_model.encoder.layers.5.layer_norm1.weight', 'vision_model.encoder.layers.5.layer_norm1.bias', 'vision_model.encoder.layers.5.self_attn.q_proj.weight', 'vision_model.encoder.layers.5.self_attn.k_proj.weight', 'vision_model.encoder.layers.5.self_attn.v_proj.weight', 'vision_model.encoder.layers.5.self_attn.out_proj.weight', 'vision_model.encoder.layers.5.layer_norm2.weight', 'vision_model.encoder.layers.5.layer_norm2.bias', 'vision_model.encoder.layers.5.mlp.fc1.weight', 'vision_model.encoder.layers.5.mlp.fc2.weight', 'vision_model.encoder.layers.6.layer_norm1.weight', 'vision_model.encoder.layers.6.layer_norm1.bias', 'vision_model.encoder.layers.6.self_attn.q_proj.weight', 'vision_model.encoder.layers.6.self_attn.k_proj.weight', 'vision_model.encoder.layers.6.self_attn.v_proj.weight', 'vision_model.encoder.layers.6.self_attn.out_proj.weight', 'vision_model.encoder.layers.6.layer_norm2.weight', 'vision_model.encoder.layers.6.layer_norm2.bias', 'vision_model.encoder.layers.6.mlp.fc1.weight', 'vision_model.encoder.layers.6.mlp.fc2.weight', 'vision_model.encoder.layers.7.layer_norm1.weight', 'vision_model.encoder.layers.7.layer_norm1.bias', 'vision_model.encoder.layers.7.self_attn.q_proj.weight', 'vision_model.encoder.layers.7.self_attn.k_proj.weight', 'vision_model.encoder.layers.7.self_attn.v_proj.weight', 'vision_model.encoder.layers.7.self_attn.out_proj.weight', 'vision_model.encoder.layers.7.layer_norm2.weight', 'vision_model.encoder.layers.7.layer_norm2.bias', 'vision_model.encoder.layers.7.mlp.fc1.weight', 'vision_model.encoder.layers.7.mlp.fc2.weight', 'vision_model.encoder.layers.8.layer_norm1.weight', 'vision_model.encoder.layers.8.layer_norm1.bias', 'vision_model.encoder.layers.8.self_attn.q_proj.weight', 'vision_model.encoder.layers.8.self_attn.k_proj.weight', 'vision_model.encoder.layers.8.self_attn.v_proj.weight', 'vision_model.encoder.layers.8.self_attn.out_proj.weight', 'vision_model.encoder.layers.8.layer_norm2.weight', 'vision_model.encoder.layers.8.layer_norm2.bias', 'vision_model.encoder.layers.8.mlp.fc1.weight', 'vision_model.encoder.layers.8.mlp.fc2.weight', 'vision_model.encoder.layers.9.layer_norm1.weight', 'vision_model.encoder.layers.9.layer_norm1.bias', 'vision_model.encoder.layers.9.self_attn.q_proj.weight', 'vision_model.encoder.layers.9.self_attn.k_proj.weight', 'vision_model.encoder.layers.9.self_attn.v_proj.weight', 'vision_model.encoder.layers.9.self_attn.out_proj.weight', 'vision_model.encoder.layers.9.layer_norm2.weight', 'vision_model.encoder.layers.9.layer_norm2.bias', 'vision_model.encoder.layers.9.mlp.fc1.weight', 'vision_model.encoder.layers.9.mlp.fc2.weight', 'vision_model.encoder.layers.10.layer_norm1.weight', 'vision_model.encoder.layers.10.layer_norm1.bias', 'vision_model.encoder.layers.10.self_attn.q_proj.weight', 'vision_model.encoder.layers.10.self_attn.k_proj.weight', 'vision_model.encoder.layers.10.self_attn.v_proj.weight', 'vision_model.encoder.layers.10.self_attn.out_proj.weight', 'vision_model.encoder.layers.10.layer_norm2.weight', 'vision_model.encoder.layers.10.layer_norm2.bias', 'vision_model.encoder.layers.10.mlp.fc1.weight', 'vision_model.encoder.layers.10.mlp.fc2.weight', 'vision_model.encoder.layers.11.layer_norm1.weight', 'vision_model.encoder.layers.11.layer_norm1.bias', 'vision_model.encoder.layers.11.self_attn.q_proj.weight', 'vision_model.encoder.layers.11.self_attn.k_proj.weight', 'vision_model.encoder.layers.11.self_attn.v_proj.weight', 'vision_model.encoder.layers.11.self_attn.out_proj.weight', 'vision_model.encoder.layers.11.layer_norm2.weight', 'vision_model.encoder.layers.11.layer_norm2.bias', 'vision_model.encoder.layers.11.mlp.fc1.weight', 'vision_model.encoder.layers.11.mlp.fc2.weight', 'vision_model.encoder.layers.12.layer_norm1.weight', 'vision_model.encoder.layers.12.layer_norm1.bias', 'vision_model.encoder.layers.12.self_attn.q_proj.weight', 'vision_model.encoder.layers.12.self_attn.k_proj.weight', 'vision_model.encoder.layers.12.self_attn.v_proj.weight', 'vision_model.encoder.layers.12.self_attn.out_proj.weight', 'vision_model.encoder.layers.12.layer_norm2.weight', 'vision_model.encoder.layers.12.layer_norm2.bias', 'vision_model.encoder.layers.12.mlp.fc1.weight', 'vision_model.encoder.layers.12.mlp.fc2.weight', 'vision_model.encoder.layers.13.layer_norm1.weight', 'vision_model.encoder.layers.13.layer_norm1.bias', 'vision_model.encoder.layers.13.self_attn.q_proj.weight', 'vision_model.encoder.layers.13.self_attn.k_proj.weight', 'vision_model.encoder.layers.13.self_attn.v_proj.weight', 'vision_model.encoder.layers.13.self_attn.out_proj.weight', 'vision_model.encoder.layers.13.layer_norm2.weight', 'vision_model.encoder.layers.13.layer_norm2.bias', 'vision_model.encoder.layers.13.mlp.fc1.weight', 'vision_model.encoder.layers.13.mlp.fc2.weight', 'vision_model.encoder.layers.14.layer_norm1.weight', 'vision_model.encoder.layers.14.layer_norm1.bias', 'vision_model.encoder.layers.14.self_attn.q_proj.weight', 'vision_model.encoder.layers.14.self_attn.k_proj.weight', 'vision_model.encoder.layers.14.self_attn.v_proj.weight', 'vision_model.encoder.layers.14.self_attn.out_proj.weight', 'vision_model.encoder.layers.14.layer_norm2.weight', 'vision_model.encoder.layers.14.layer_norm2.bias', 'vision_model.encoder.layers.14.mlp.fc1.weight', 'vision_model.encoder.layers.14.mlp.fc2.weight', 'vision_model.encoder.layers.15.layer_norm1.weight', 'vision_model.encoder.layers.15.layer_norm1.bias', 'vision_model.encoder.layers.15.self_attn.q_proj.weight', 'vision_model.encoder.layers.15.self_attn.k_proj.weight', 'vision_model.encoder.layers.15.self_attn.v_proj.weight', 'vision_model.encoder.layers.15.self_attn.out_proj.weight', 'vision_model.encoder.layers.15.layer_norm2.weight', 'vision_model.encoder.layers.15.layer_norm2.bias', 'vision_model.encoder.layers.15.mlp.fc1.weight', 'vision_model.encoder.layers.15.mlp.fc2.weight', 'vision_model.encoder.layers.16.layer_norm1.weight', 'vision_model.encoder.layers.16.layer_norm1.bias', 'vision_model.encoder.layers.16.self_attn.q_proj.weight', 'vision_model.encoder.layers.16.self_attn.k_proj.weight', 'vision_model.encoder.layers.16.self_attn.v_proj.weight', 'vision_model.encoder.layers.16.self_attn.out_proj.weight', 'vision_model.encoder.layers.16.layer_norm2.weight', 'vision_model.encoder.layers.16.layer_norm2.bias', 'vision_model.encoder.layers.16.mlp.fc1.weight', 'vision_model.encoder.layers.16.mlp.fc2.weight', 'vision_model.encoder.layers.17.layer_norm1.weight', 'vision_model.encoder.layers.17.layer_norm1.bias', 'vision_model.encoder.layers.17.self_attn.q_proj.weight', 'vision_model.encoder.layers.17.self_attn.k_proj.weight', 'vision_model.encoder.layers.17.self_attn.v_proj.weight', 'vision_model.encoder.layers.17.self_attn.out_proj.weight', 'vision_model.encoder.layers.17.layer_norm2.weight', 'vision_model.encoder.layers.17.layer_norm2.bias', 'vision_model.encoder.layers.17.mlp.fc1.weight', 'vision_model.encoder.layers.17.mlp.fc2.weight', 'vision_model.encoder.layers.18.layer_norm1.weight', 'vision_model.encoder.layers.18.layer_norm1.bias', 'vision_model.encoder.layers.18.self_attn.q_proj.weight', 'vision_model.encoder.layers.18.self_attn.k_proj.weight', 'vision_model.encoder.layers.18.self_attn.v_proj.weight', 'vision_model.encoder.layers.18.self_attn.out_proj.weight', 'vision_model.encoder.layers.18.layer_norm2.weight', 'vision_model.encoder.layers.18.layer_norm2.bias', 'vision_model.encoder.layers.18.mlp.fc1.weight', 'vision_model.encoder.layers.18.mlp.fc2.weight', 'vision_model.encoder.layers.19.layer_norm1.weight', 'vision_model.encoder.layers.19.layer_norm1.bias', 'vision_model.encoder.layers.19.self_attn.q_proj.weight', 'vision_model.encoder.layers.19.self_attn.k_proj.weight', 'vision_model.encoder.layers.19.self_attn.v_proj.weight', 'vision_model.encoder.layers.19.self_attn.out_proj.weight', 'vision_model.encoder.layers.19.layer_norm2.weight', 'vision_model.encoder.layers.19.layer_norm2.bias', 'vision_model.encoder.layers.19.mlp.fc1.weight', 'vision_model.encoder.layers.19.mlp.fc2.weight', 'vision_model.encoder.layers.20.layer_norm1.weight', 'vision_model.encoder.layers.20.layer_norm1.bias', 'vision_model.encoder.layers.20.self_attn.q_proj.weight', 'vision_model.encoder.layers.20.self_attn.k_proj.weight', 'vision_model.encoder.layers.20.self_attn.v_proj.weight', 'vision_model.encoder.layers.20.self_attn.out_proj.weight', 'vision_model.encoder.layers.20.layer_norm2.weight', 'vision_model.encoder.layers.20.layer_norm2.bias', 'vision_model.encoder.layers.20.mlp.fc1.weight', 'vision_model.encoder.layers.20.mlp.fc2.weight', 'vision_model.encoder.layers.21.layer_norm1.weight', 'vision_model.encoder.layers.21.layer_norm1.bias', 'vision_model.encoder.layers.21.self_attn.q_proj.weight', 'vision_model.encoder.layers.21.self_attn.k_proj.weight', 'vision_model.encoder.layers.21.self_attn.v_proj.weight', 'vision_model.encoder.layers.21.self_attn.out_proj.weight', 'vision_model.encoder.layers.21.layer_norm2.weight', 'vision_model.encoder.layers.21.layer_norm2.bias', 'vision_model.encoder.layers.21.mlp.fc1.weight', 'vision_model.encoder.layers.21.mlp.fc2.weight', 'vision_model.encoder.layers.22.layer_norm1.weight', 'vision_model.encoder.layers.22.layer_norm1.bias', 'vision_model.encoder.layers.22.self_attn.q_proj.weight', 'vision_model.encoder.layers.22.self_attn.k_proj.weight', 'vision_model.encoder.layers.22.self_attn.v_proj.weight', 'vision_model.encoder.layers.22.self_attn.out_proj.weight', 'vision_model.encoder.layers.22.layer_norm2.weight', 'vision_model.encoder.layers.22.layer_norm2.bias', 'vision_model.encoder.layers.22.mlp.fc1.weight', 'vision_model.encoder.layers.22.mlp.fc2.weight', 'vision_model.encoder.layers.23.layer_norm1.weight', 'vision_model.encoder.layers.23.layer_norm1.bias', 'vision_model.encoder.layers.23.self_attn.q_proj.weight', 'vision_model.encoder.layers.23.self_attn.k_proj.weight', 'vision_model.encoder.layers.23.self_attn.v_proj.weight', 'vision_model.encoder.layers.23.self_attn.out_proj.weight', 'vision_model.encoder.layers.23.layer_norm2.weight', 'vision_model.encoder.layers.23.layer_norm2.bias', 'vision_model.encoder.layers.23.mlp.fc1.weight', 'vision_model.encoder.layers.23.mlp.fc2.weight', 'vision_model.encoder.layers.24.layer_norm1.weight', 'vision_model.encoder.layers.24.layer_norm1.bias', 'vision_model.encoder.layers.24.self_attn.q_proj.weight', 'vision_model.encoder.layers.24.self_attn.k_proj.weight', 'vision_model.encoder.layers.24.self_attn.v_proj.weight', 'vision_model.encoder.layers.24.self_attn.out_proj.weight', 'vision_model.encoder.layers.24.layer_norm2.weight', 'vision_model.encoder.layers.24.layer_norm2.bias', 'vision_model.encoder.layers.24.mlp.fc1.weight', 'vision_model.encoder.layers.24.mlp.fc2.weight', 'vision_model.encoder.layers.25.layer_norm1.weight', 'vision_model.encoder.layers.25.layer_norm1.bias', 'vision_model.encoder.layers.25.self_attn.q_proj.weight', 'vision_model.encoder.layers.25.self_attn.k_proj.weight', 'vision_model.encoder.layers.25.self_attn.v_proj.weight', 'vision_model.encoder.layers.25.self_attn.out_proj.weight', 'vision_model.encoder.layers.25.layer_norm2.weight', 'vision_model.encoder.layers.25.layer_norm2.bias', 'vision_model.encoder.layers.25.mlp.fc1.weight', 'vision_model.encoder.layers.25.mlp.fc2.weight', 'vision_model.encoder.layers.26.layer_norm1.weight', 'vision_model.encoder.layers.26.layer_norm1.bias', 'vision_model.encoder.layers.26.self_attn.q_proj.weight', 'vision_model.encoder.layers.26.self_attn.k_proj.weight', 'vision_model.encoder.layers.26.self_attn.v_proj.weight', 'vision_model.encoder.layers.26.self_attn.out_proj.weight', 'vision_model.encoder.layers.26.layer_norm2.weight', 'vision_model.encoder.layers.26.layer_norm2.bias', 'vision_model.encoder.layers.26.mlp.fc1.weight', 'vision_model.encoder.layers.26.mlp.fc2.weight', 'vision_model.post_layernorm.weight', 'vision_model.post_layernorm.bias']
+2026-01-28T21:09:17.927053 - CLIP/text encoder model load device: cuda:0, offload device: cpu, current: cpu, dtype: torch.float16
+2026-01-28T21:09:17.948463 - [LTX2 TE Optimized] Detected LTXAVTEModel, using chunked encoding (chunk_size=64)2026-01-28T21:09:17.948463 - 
+2026-01-28T21:09:17.948463 - [LTX2 TE Optimized] Running Gemma encoder...2026-01-28T21:09:17.948463 - 
+2026-01-28T21:11:10.716782 - [LTX2 TE Optimized] Projection input: (1, 272, 188160)2026-01-28T21:11:10.716782 - 
+2026-01-28T21:11:11.820894 - [LTX2 TE Optimized] Processing 272 positions in chunks of 64...2026-01-28T21:11:11.820894 - 
+2026-01-28T21:11:16.195714 - [LTX2 TE Optimized] Projection complete: (torch.Size([1, 272, 3840]))2026-01-28T21:11:16.195714 - 
+2026-01-28T21:11:16.198263 - [LTX2 TE Optimized] Running video embeddings connector...2026-01-28T21:11:16.199277 - 
+2026-01-28T21:11:20.114129 - [LTX2 TE Optimized] Running audio embeddings connector...2026-01-28T21:11:20.114129 - 
+2026-01-28T21:11:24.446080 - [LTX2 TE Optimized] ✓ Encoding complete: torch.Size([1, 1024, 7680])2026-01-28T21:11:24.447083 - 
+2026-01-28T21:11:24.988619 - gguf qtypes: F32 (2140), BF16 (26), Q4_K (1008), Q6_K (336)
+2026-01-28T21:11:25.196183 - model weight dtype torch.bfloat16, manual cast: torch.float32
+2026-01-28T21:11:25.197189 - model_type FLUX
+2026-01-28T21:11:25.579317 - [LTX2Pro] Patched model forward() for attention_mask & 3D latents (with AV split support)2026-01-28T21:11:25.579317 - 
+2026-01-28T21:11:25.579317 - [LTX2Pro] 🎵 Audio-Video mode (NestedTensor detected)2026-01-28T21:11:25.579317 - 
+2026-01-28T21:11:25.579317 - [LTX2Pro] Latent shape: torch.Size([1, 128, 4, 8, 12])2026-01-28T21:11:25.579317 - 
+2026-01-28T21:11:25.579317 - [LTX2Pro] Using external sigmas2026-01-28T21:11:25.579317 - 
+2026-01-28T21:11:25.581717 - [LTX2Pro] Sigma range: 1.0000 -> 0.0000, steps: 192026-01-28T21:11:25.581717 - 
+2026-01-28T21:11:25.581717 - [LTX2Pro] Set frame_rate=25.02026-01-28T21:11:25.581717 - 
+2026-01-28T21:11:25.581717 - [LTX2Pro] Preset: Quality - Cool (RTX 2060 6GB)2026-01-28T21:11:25.581717 - 
+2026-01-28T21:11:25.583028 - [LTX2Pro] -> freeze_ratio=0.25, throttle_delay=100ms2026-01-28T21:11:25.583028 - 
+2026-01-28T21:11:25.585045 - [FFNChunking] Wrapped 48 FFN modules with 8 chunks2026-01-28T21:11:25.585045 - 
+2026-01-28T21:11:25.585045 - [FFNChunking] Estimated peak FFN VRAM reduction: ~8x2026-01-28T21:11:25.585045 - 
+2026-01-28T21:11:25.585045 - [LTX2Pro] ⚠️ Audio-Video Mode: Disabling input noise_mask to prevent patchifier crash.2026-01-28T21:11:25.585045 - 
+2026-01-28T21:11:25.585045 - [LTX2Pro]    (CFGGuider will generate a compatible default mask)2026-01-28T21:11:25.585045 - 
+2026-01-28T21:11:25.688941 - [LTX2Pro] 🚀 Starting sampling (19 steps)...2026-01-28T21:11:25.688941 - 
+2026-01-28T21:11:25.688941 - Requested to load LTXAV
+2026-01-28T21:12:58.938165 - loaded partially; 3658.80 MB usable, 3406.61 MB loaded, 8835.36 MB offloaded, 252.19 MB buffer reserved, lowvram patches: 0
+2026-01-28T21:12:59.038267 - 
+  0%|          | 0/19 [00:00<?, ?it/s]2026-01-28T21:12:59.102366 - 
+  0%|          | 0/19 [00:00<?, ?it/s]2026-01-28T21:12:59.103367 - 
+2026-01-28T21:12:59.103367 - [FFNChunking] Restored 48 original FFN modules2026-01-28T21:12:59.104370 - 
+2026-01-28T21:12:59.121722 - !!! Exception during processing !!! 'list' object has no attribute 'ndim'
+2026-01-28T21:12:59.180698 - Traceback (most recent call last):
   File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\execution.py", line 518, in execute
     output_data, output_ui, has_subgraph, has_pending_tasks = await get_output_data(prompt_id, unique_id, obj, input_data_all, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)
                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -530,48 +468,12 @@ Import times for custom nodes:
   File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1786, in _call_impl
     return forward_call(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-ltx2-efficient\nodes\ltx2_efficient_sampler_pro.py", line 231, in patched_forward
-    out_video = original_forward(x_video_5d, timestep, context, attention_mask=attention_mask, **kwargs)
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 745, in forward
-    return comfy.patcher_extension.WrapperExecutor.new_class_executor(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\patcher_extension.py", line 112, in execute
-    return self.original(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 785, in _forward
-    context, attention_mask = self._prepare_context(context, batch_size, x, attention_mask)
-                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 674, in _prepare_context
-    context = self.caption_projection(context)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1775, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1786, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ldm\lightricks\model.py", line 269, in forward
-    hidden_states = self.linear_1(caption)
-                    ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1775, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\rafae\Documents\ComfyUI\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1786, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\rafae\AppData\Local\Programs\@comfyorgcomfyui-electron\resources\ComfyUI\comfy\ops.py", line 164, in forward
-    return self.forward_comfy_cast_weights(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\Vantage-Nodes\ops.py", line 215, in forward_comfy_cast_weights
-    out = self.forward_ggml_cast_weights(input, *args, **kwargs)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\Vantage-Nodes\ops.py", line 244, in forward_ggml_cast_weights
-    return torch.nn.functional.linear(input, weight, bias)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-RuntimeError: mat1 and mat2 shapes cannot be multiplied (1024x7680 and 4096x4096)
+  File "C:\Users\rafae\Documents\ComfyUI\custom_nodes\comfyui-ltx2-efficient\nodes\ltx2_efficient_sampler_pro.py", line 203, in patched_forward
+    if x.ndim == 3 and current_shape is not None and len(current_shape) == 5:
+       ^^^^^^
+AttributeError: 'list' object has no attribute 'ndim'
 
-2026-01-28T18:35:28.302192 - Prompt executed in 80.91 seconds
+2026-01-28T21:12:59.185646 - Prompt executed in 263.47 seconds
 
 ```
 ## Attached Workflow

@@ -199,60 +199,36 @@ class LTX2EfficientSamplerPro:
             # Get current latent shape
             current_shape = getattr(diffusion_model, '_ltx2_efficient_shape', None)
             
-            # Logic for resizing/handling 3D input
-            if x.ndim == 3 and current_shape is not None and len(current_shape) == 5:
-                b, c, l = x.shape
-                _, _, f, h, w = current_shape
-                expected_video_size = f * h * w * current_shape[1]
+            # Handle case where x is a list (passthrough to original)
+            if isinstance(x, (list, tuple)):
+                return original_forward(x, timestep, context, attention_mask=attention_mask, **kwargs)
+            
+            # Handle case where x is not a tensor (passthrough)
+            if not hasattr(x, 'ndim'):
+                return original_forward(x, timestep, context, attention_mask=attention_mask, **kwargs)
+            
+            # IMPORTANT: CFGGuider.sample() handles NestedTensor packing/unpacking correctly
+            # We should NOT interfere with audio-video latent handling here
+            # Our patch only needs to ensure attention_mask is passed through
+            
+            # For 3D packed latents from CFGGuider, just passthrough 
+            # The model (LTXAVModel) knows how to handle combined audio-video latents
+            if x.ndim == 3:
+                # Debug once
+                if not getattr(diffusion_model, '_ltx2_debug_logged', False):
+                    print(f"[LTX2Pro] DEBUG: Model Class: {type(diffusion_model).__name__}")
+                    print(f"[LTX2Pro] DEBUG: Input Shape: {x.shape}")
+                    print(f"[LTX2Pro] DEBUG: Passing through to original forward()")
+                    diffusion_model._ltx2_debug_logged = True
                 
-                # Case 1: Video Only (Exact match)
-                if l == expected_video_size:
-                     x_5d = x.view(b, current_shape[1], f, h, w)
-                     return original_forward(x_5d, timestep, context, attention_mask=attention_mask, **kwargs)
-                
-                # Case 2: Audio-Video (Input larger than video)
-                elif l > expected_video_size:
-                     # Split Video and Audio
-                     x_video = x[..., :expected_video_size]
-                     x_audio = x[..., expected_video_size:]
-                     
-                     # Debug Model Capabilities (Once)
-                     if not getattr(diffusion_model, '_ltx2_debug_logged', False):
-                         print(f"[LTX2Pro] DEBUG: Model Class: {type(diffusion_model).__name__}")
-                         print(f"[LTX2Pro] DEBUG: In Channels: {getattr(diffusion_model, 'in_channels', 'N/A')}")
-                         print(f"[LTX2Pro] DEBUG: Audio In Channels: {getattr(diffusion_model, 'audio_in_channels', 'N/A')}")
-                         diffusion_model._ltx2_debug_logged = True
-
-                     # Reshape Video to 5D
-                     x_video_5d = x_video.view(b, current_shape[1], f, h, w)
-                     
-                     # Process Video part ONLY (Bypass Audio to prevent crash)
-                     # LTX is natively Video-Only, so we cannot pass Audio to it directly.
-                     out_video = original_forward(x_video_5d, timestep, context, attention_mask=attention_mask, **kwargs)
-                     
-                     # Check output shape
-                     # If model returns list (unlikely based on code), handle it
-                     if isinstance(out_video, (list, tuple)):
-                         out_video = out_video[0]
-
-                     if out_video.ndim == 5:
-                         # Flatten back to 3D (B, 1, L_video)
-                         # Note: pack_latents flattens to (B, 1, -1) so we should verify dimensions
-                         # But simplistic flatten: view(b, 1, -1)
-                         out_video_flat = out_video.view(b, c, expected_video_size)
-                     else:
-                         # Fallback if model returns something else, assumption might be wrong
-                         out_video_flat = out_video.view(b, c, -1)
-                         
-                     # Handle Extra part (Audio) - Return Zeros (Bypass)
-                     # This results in Static Audio (Noise) but allows Video to generate.
-                     out_audio = torch.zeros_like(x_audio)
-                     
-                     # Recombine
-                     out_combined = torch.cat([out_video_flat, out_audio], dim=-1)
-                     return out_combined
-                
-            # Default fallthrough (2D/Standard or non-matching shapes)
+                # Let the model handle it natively - don't split or reshape
+                return original_forward(x, timestep, context, attention_mask=attention_mask, **kwargs)
+            
+            # For 5D video-only latents (standard case)
+            if x.ndim == 5:
+                return original_forward(x, timestep, context, attention_mask=attention_mask, **kwargs)
+            
+            # Default fallthrough
             return original_forward(x, timestep, context, attention_mask=attention_mask, **kwargs)
             
         # Apply patch
@@ -355,18 +331,12 @@ class LTX2EfficientSamplerPro:
             latent_image = comfy.sample.fix_empty_latent_channels(model, samples)
             
             # Get noise_mask if present
+            # NOTE: CFGGuider.sample() properly handles NestedTensor denoise_mask!
+            # (lines 1013-1029 in samplers.py: unbinds, prepares each, repacks)
+            # So we should NOT disable it - that was causing input images to be ignored.
             noise_mask = latent_video.get("noise_mask", None)
-            
-            # CRITICAL: For NestedTensor (audio-video), we MUST disable the noise_mask
-            # coming from the input node (LTXVConcatAVLatent).
-            # The mask provided there causes packing issues in CFGGuider, resulting in a 3D mask
-            # reaching the patchifier (expected 5D).
-            # By setting it to None, CFGGuider generates a fresh all-ones mask that packs correctly.
-            if is_nested:
-                if noise_mask is not None:
-                    print(f"[LTX2Pro] ⚠️ Audio-Video Mode: Disabling input noise_mask to prevent patchifier crash.")
-                    print(f"[LTX2Pro]    (CFGGuider will generate a compatible default mask)")
-                noise_mask = None
+            if noise_mask is not None and is_nested:
+                print(f"[LTX2Pro] Audio-Video Mode: Using noise_mask with NestedTensor (CFGGuider handles this)")
             
             # Generate noise using comfy.sample.prepare_noise (handles NestedTensor)
             noise = comfy.sample.prepare_noise(latent_image, seed)

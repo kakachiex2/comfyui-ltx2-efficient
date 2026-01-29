@@ -85,11 +85,18 @@ class LTX2TextEncodeOptimized:
         out, pooled, extra = te_model.gemma3_12b.encode_token_weights(token_weight_pairs)
         out_device = out.device
         
-        # Prepare tensor (normalization step)
-        if comfy.model_management.should_use_bf16(te_model.execution_device):
-            out = out.to(device=te_model.execution_device, dtype=torch.bfloat16)
+        # Get execution device safely (fallback to torch device if not set)
+        execution_device = getattr(te_model, 'execution_device', None)
+        if execution_device is None:
+            execution_device = comfy.model_management.get_torch_device()
         
-        out = out.movedim(1, -1).to(te_model.execution_device)
+        # Prepare tensor (normalization step)
+        if comfy.model_management.should_use_bf16(execution_device):
+            out = out.to(device=execution_device, dtype=torch.bfloat16)
+        else:
+            out = out.to(device=execution_device)
+        
+        out = out.movedim(1, -1)
         out = 8.0 * (out - out.mean(dim=(1, 2), keepdim=True)) / (
             out.amax(dim=(1, 2), keepdim=True) - out.amin(dim=(1, 2), keepdim=True) + 1e-6
         )
