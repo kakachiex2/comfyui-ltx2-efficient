@@ -3,6 +3,7 @@ import math
 import comfy.samplers
 import comfy.sample
 import comfy.model_management
+import comfy.utils
 import node_helpers
 import nodes
 from .interpolation import interpolate
@@ -371,47 +372,80 @@ class LTX2EfficientSampler:
         # 3. Frame striding/extraction would break audio-video synchronization
         # 4. ComfyUI's samplers natively support NestedTensor operations
         if is_nested:
-            # NestedTensor (audio-video combined latent from LTXVConcatAVLatent) is NOT supported
-            # because ComfyUI's model_base.py process_timestep can't handle the 3D audio tensor shape
-            # when computing denoise_mask for patchifier. This causes "not enough values to unpack" error.
-            #
-            # WORKAROUND for users:
-            # Option 1: Use standard KSampler node (NOT the efficient sampler) for audio-video
-            # Option 2: Use LTXVSeparateAVLatent before this node to split video from audio,
-            #           then sample video efficiently and recombine after
+            # AUDIO-VIDEO MODE: Use CFGGuider for proper NestedTensor support
+            # This is the same approach used by SamplerCustomAdvanced
+            print(f"[LTX2Efficient] 🎵 Audio-Video mode (NestedTensor detected)")
+            print(f"[LTX2Efficient] Switching to CFGGuider-based sampling (no frame striding)")
             
-            error_msg = """
-╔══════════════════════════════════════════════════════════════════════════════╗
-║  LTX2 Efficient Sampler: Audio-Video Mode NOT Supported                      ║
-╠══════════════════════════════════════════════════════════════════════════════╣
-║                                                                              ║
-║  Detected NestedTensor from LTXVConcatAVLatent (combined audio+video).       ║
-║  This is not compatible with the efficient sampler optimizations.            ║
-║                                                                              ║
-║  WORKAROUNDS:                                                                ║
-║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ║
-║                                                                              ║
-║  Option 1: Use standard KSampler                                             ║
-║    • Replace LTX2EfficientSampler with standard KSampler node                ║
-║    • Works with audio-video but no VRAM optimizations                        ║
-║                                                                              ║
-║  Option 2: Split audio from video (RECOMMENDED)                              ║
-║    • Use LTXVSeparateAVLatent node BEFORE this sampler                       ║
-║    • Connect ONLY the video latent to LTX2EfficientSampler                   ║
-║    • Use a separate KSampler for audio latent                                ║
-║    • Use LTXVConcatAVLatent to recombine after sampling                      ║
-║                                                                              ║
-║  This limitation exists because ComfyUI's model internals don't properly     ║
-║  handle the 3D audio tensor shape in process_timestep for patchifier.        ║
-║                                                                              ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-"""
-            print(error_msg)
-            raise ValueError(
-                "[LTX2EfficientSampler] Audio-video NestedTensor is not supported. "
-                "Use standard KSampler or LTXVSeparateAVLatent to split video from audio first. "
-                "See console output for detailed workarounds."
+            # Get first tensor's shape for sigma generation
+            if hasattr(samples, 'unbind'):
+                first_tensor = samples.unbind()[0]
+                latent_shape = first_tensor.shape
+            else:
+                latent_shape = samples.shape
+            print(f"[LTX2Efficient] Video latent shape: {latent_shape}")
+            
+            # Generate or use provided sigmas
+            if sigmas is not None:
+                print(f"[LTX2Efficient] Using external sigmas")
+                print(f"[LTX2Efficient] Sigma range: {sigmas[0]:.4f} -> {sigmas[-1]:.4f}, steps: {len(sigmas)-1}")
+                use_sigmas = sigmas
+            else:
+                print(f"[LTX2Efficient] Generating LTX FlowMatch sigmas")
+                use_sigmas = self._generate_ltx_sigmas(steps, latent_shape, max_shift, base_shift, terminal, stretch)
+                print(f"[LTX2Efficient] Sigmas: {use_sigmas[0]:.4f} -> {use_sigmas[-1]:.4f}")
+            
+            # Truncate sigmas for denoise < 1.0
+            if denoise < 1.0:
+                total_sigmas = len(use_sigmas) - 1
+                start_step = int(total_sigmas * (1 - denoise))
+                use_sigmas = use_sigmas[start_step:]
+            
+            # Inject frame_rate into conditioning
+            positive = node_helpers.conditioning_set_values(positive, {"frame_rate": frame_rate})
+            negative = node_helpers.conditioning_set_values(negative, {"frame_rate": frame_rate})
+            print(f"[LTX2Efficient] Set frame_rate={frame_rate}")
+            
+            # Fix empty latent channels
+            latent_image = comfy.sample.fix_empty_latent_channels(model, samples)
+            
+            # Get noise_mask if present (CFGGuider handles NestedTensor denoise_mask properly)
+            noise_mask = latent_video.get("noise_mask", None)
+            if noise_mask is not None:
+                print(f"[LTX2Efficient] Using noise_mask with NestedTensor")
+            
+            # Generate noise
+            noise = comfy.sample.prepare_noise(latent_image, seed)
+            
+            # Create CFGGuider (same as SamplerCustomAdvanced)
+            guider = comfy.samplers.CFGGuider(model)
+            guider.set_conds(positive, negative)
+            guider.set_cfg(cfg)
+            
+            # Create KSAMPLER sampler object
+            sampler = comfy.samplers.ksampler(sampler_name)
+            
+            print(f"[LTX2Efficient] 🚀 Starting Audio-Video sampling ({len(use_sigmas)-1} steps)...")
+            
+            # Use CFGGuider.sample() - properly handles NestedTensor
+            result = guider.sample(
+                noise,
+                latent_image,
+                sampler,
+                use_sigmas,
+                denoise_mask=noise_mask,
+                callback=None,
+                disable_pbar=not comfy.utils.PROGRESS_BAR_ENABLED,
+                seed=seed
             )
+            
+            result = result.to(comfy.model_management.intermediate_device())
+            print(f"[LTX2Efficient] ✓ Audio-Video sampling complete")
+            
+            # Return result
+            out = latent_video.copy()
+            out["samples"] = result
+            return (out,)
         
         # Video-only mode continues below with efficient features
         converted = False  # Track if NestedTensor was successfully converted

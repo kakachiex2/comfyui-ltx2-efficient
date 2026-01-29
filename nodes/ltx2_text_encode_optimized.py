@@ -93,15 +93,34 @@ class LTX2TextEncodeOptimized:
         if execution_device is None:
             execution_device = comfy.model_management.get_torch_device()
         
-        # Prepare tensor - PRESERVE DTYPE (critical for audio!)
+        # Prepare tensor - compute normalization in float32 to avoid NaN/Inf
         use_bf16 = comfy.model_management.should_use_bf16(execution_device)
         target_dtype = torch.bfloat16 if use_bf16 else torch.float16
         
-        out = out.to(device=execution_device, dtype=target_dtype)
+        # Move to device first, then do normalization in float32 for numerical stability
+        out = out.to(device=execution_device)
         out = out.movedim(1, -1)
-        out = 8.0 * (out - out.mean(dim=(1, 2), keepdim=True)) / (
-            out.amax(dim=(1, 2), keepdim=True) - out.amin(dim=(1, 2), keepdim=True) + 1e-6
-        )
+        
+        # Perform normalization in float32 to prevent NaN/Inf
+        out = out.float()
+        out_mean = out.mean(dim=(1, 2), keepdim=True)
+        out_max = out.amax(dim=(1, 2), keepdim=True)
+        out_min = out.amin(dim=(1, 2), keepdim=True)
+        out_range = out_max - out_min
+        
+        # Use larger epsilon and handle edge case where range is too small
+        epsilon = 1e-5
+        out_range = torch.where(out_range < epsilon, torch.ones_like(out_range), out_range)
+        out = 8.0 * (out - out_mean) / (out_range + epsilon)
+        
+        # Clamp to prevent extreme values and check for NaN/Inf
+        out = torch.clamp(out, -100.0, 100.0)
+        if torch.isnan(out).any() or torch.isinf(out).any():
+            print("[LTX2 TE Optimized] WARNING: NaN/Inf detected after normalization, replacing with zeros")
+            out = torch.nan_to_num(out, nan=0.0, posinf=0.0, neginf=0.0)
+        
+        # Convert back to target dtype
+        out = out.to(dtype=target_dtype)
         out = out.reshape((out.shape[0], out.shape[1], -1))
         
         # Get dimensions
@@ -146,6 +165,11 @@ class LTX2TextEncodeOptimized:
         # Continue with embeddings connectors
         projected = projected.float()
         
+        # Check projected for NaN/Inf before connectors
+        if torch.isnan(projected).any() or torch.isinf(projected).any():
+            print("[LTX2 TE Optimized] WARNING: NaN/Inf in projected embeddings, sanitizing...")
+            projected = torch.nan_to_num(projected, nan=0.0, posinf=0.0, neginf=0.0)
+        
         print("[LTX2 TE Optimized] Running video embeddings connector...")
         out_vid = te_model.video_embeddings_connector(projected)[0]
         
@@ -154,6 +178,11 @@ class LTX2TextEncodeOptimized:
         
         # Combine
         out_final = torch.concat((out_vid, out_audio), dim=-1)
+        
+        # Final safety check - ensure no NaN/Inf in output (critical for audio encoding!)
+        if torch.isnan(out_final).any() or torch.isinf(out_final).any():
+            print("[LTX2 TE Optimized] WARNING: NaN/Inf in final output, sanitizing to prevent SaveVideo crash...")
+            out_final = torch.nan_to_num(out_final, nan=0.0, posinf=0.0, neginf=0.0)
         
         # Final cleanup
         del projected, out_vid, out_audio

@@ -133,35 +133,48 @@ class LTX2EfficientSamplerPro:
     def _generate_ltx_sigmas(self, steps, latent_shape, max_shift=2.05, base_shift=0.95, terminal=0.1, stretch=True):
         """
         Generate LTX-compatible sigmas using FlowMatch formula.
+        
+        This matches the official LTXVScheduler implementation exactly.
         """
-        # Extract dimensions for mu calculation
+        import math
+        
+        # Extract dimensions for token calculation
         if len(latent_shape) >= 5:
             _, _, frames, h, w = latent_shape[:5]
         elif len(latent_shape) >= 4:
             _, frames, h, w = latent_shape[:4]
         else:
-            frames, h, w = 20, 64, 64  # Fallback defaults
+            frames, h, w = 13, 16, 24  # Fallback defaults for 512x768x97
         
-        # Calculate mu based on image dimensions (FlowMatch formula)
-        img_size = h * w * frames
-        log_img = math.log(img_size) / math.log(4096)
-        mu = log_img * max_shift + base_shift
+        # Calculate tokens (same as official LTXVScheduler)
+        tokens = frames * h * w
         
-        # Generate timesteps
-        timesteps = torch.linspace(1, terminal, steps + 1, dtype=torch.float32)
+        # Generate base sigmas [1.0 -> 0.0]
+        sigmas = torch.linspace(1.0, 0.0, steps + 1, dtype=torch.float32)
         
-        # Apply shift schedule
+        # Calculate sigma_shift using official formula
+        x1 = 1024
+        x2 = 4096
+        mm = (max_shift - base_shift) / (x2 - x1)
+        b = base_shift - mm * x1
+        sigma_shift = tokens * mm + b
+        
+        # Apply FlowMatch transformation (official formula)
+        power = 1
+        sigmas = torch.where(
+            sigmas != 0,
+            math.exp(sigma_shift) / (math.exp(sigma_shift) + (1 / sigmas - 1) ** power),
+            torch.zeros_like(sigmas),
+        )
+        
+        # Stretch sigmas to [terminal, 1] range (official stretch logic)
         if stretch:
-            stretched = (mu / (mu + (1 / timesteps - 1)))
-        else:
-            stretched = timesteps
-        
-        # Convert timesteps to sigmas using ComfyUI's convention
-        sigmas = stretched / (1 - stretched + 1e-8)
-        sigmas = torch.clamp(sigmas, min=0.0)
-        
-        # Ensure final sigma is 0
-        sigmas[-1] = 0.0
+            non_zero_mask = sigmas != 0
+            non_zero_sigmas = sigmas[non_zero_mask]
+            one_minus_z = 1.0 - non_zero_sigmas
+            scale_factor = one_minus_z[-1] / (1.0 - terminal)
+            stretched = 1.0 - (one_minus_z / scale_factor)
+            sigmas[non_zero_mask] = stretched
         
         return sigmas
     
