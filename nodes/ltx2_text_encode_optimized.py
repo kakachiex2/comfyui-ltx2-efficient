@@ -73,7 +73,10 @@ class LTX2TextEncodeOptimized:
     
     def _chunked_encode(self, clip, tokens, chunk_size, force_cpu):
         """
-        Implements chunked CPU encoding for LTXAVTEModel.
+        Implements chunked encoding for LTXAVTEModel.
+        
+        CRITICAL: We must preserve the original dtype (bfloat16) throughout
+        to maintain audio quality. CPU float32 processing corrupts embeddings.
         """
         te_model = clip.cond_stage_model
         
@@ -90,12 +93,11 @@ class LTX2TextEncodeOptimized:
         if execution_device is None:
             execution_device = comfy.model_management.get_torch_device()
         
-        # Prepare tensor (normalization step)
-        if comfy.model_management.should_use_bf16(execution_device):
-            out = out.to(device=execution_device, dtype=torch.bfloat16)
-        else:
-            out = out.to(device=execution_device)
+        # Prepare tensor - PRESERVE DTYPE (critical for audio!)
+        use_bf16 = comfy.model_management.should_use_bf16(execution_device)
+        target_dtype = torch.bfloat16 if use_bf16 else torch.float16
         
+        out = out.to(device=execution_device, dtype=target_dtype)
         out = out.movedim(1, -1)
         out = 8.0 * (out - out.mean(dim=(1, 2), keepdim=True)) / (
             out.amax(dim=(1, 2), keepdim=True) - out.amin(dim=(1, 2), keepdim=True) + 1e-6
@@ -104,52 +106,42 @@ class LTX2TextEncodeOptimized:
         
         # Get dimensions
         B, seq_len, features = out.shape
-        print(f"[LTX2 TE Optimized] Projection input: ({B}, {seq_len}, {features})")
+        print(f"[LTX2 TE Optimized] Projection input: ({B}, {seq_len}, {features}), dtype={out.dtype}")
         
         # Access projection layer
         projection = te_model.text_embedding_projection
+        out_features = projection.weight.shape[0]
         
         if force_cpu:
-            # Get weight and move to CPU
-            weight = projection.weight
-            weight_cpu = weight.detach().cpu().to(torch.float32)
+            # IMPROVED: Do chunked processing ON GPU with memory cleanup
+            # This preserves precision while managing memory
+            print(f"[LTX2 TE Optimized] Processing {seq_len} positions in {chunk_size}-position chunks (GPU with memory management)...")
             
-            print(f"[LTX2 TE Optimized] Processing {seq_len} positions in chunks of {chunk_size}...")
+            # Allocate output tensor
+            projected = torch.empty(B, seq_len, out_features, dtype=out.dtype, device=execution_device)
             
-            # Process in chunks
-            output_chunks = []
             for i in range(0, seq_len, chunk_size):
                 end_idx = min(i + chunk_size, seq_len)
                 
-                # Move chunk to CPU
-                chunk = out[:, i:end_idx, :].detach().cpu().float()
+                # Process chunk on GPU (preserves precision!)
+                chunk = out[:, i:end_idx, :]
+                projected[:, i:end_idx, :] = projection(chunk)
                 
-                # Compute projection on CPU
-                out_chunk = F.linear(chunk, weight_cpu, None)
-                
-                # Move result back to original device
-                output_chunks.append(out_chunk.to(device=out_device, dtype=out.dtype))
-                
-                # Cleanup
+                # Aggressive memory cleanup between chunks
                 del chunk
-                
-                # Periodic cache clear
-                if (i // chunk_size) % 4 == 0 and i > 0:
+                if i > 0 and (i // chunk_size) % 2 == 0:
                     torch.cuda.empty_cache()
-                    
-            # Concatenate
-            projected = torch.cat(output_chunks, dim=1)
-            del output_chunks, weight_cpu
             
-            print(f"[LTX2 TE Optimized] Projection complete: ({projected.shape})")
+            # Free input tensor
+            del out
+            torch.cuda.empty_cache()
+            
+            print(f"[LTX2 TE Optimized] Projection complete: {projected.shape}")
             
         else:
-            # GPU projection
+            # Full GPU projection (original behavior)
             projected = projection(out)
-        
-        # Cleanup after projection
-        del out
-        torch.cuda.empty_cache()
+            del out
         
         # Continue with embeddings connectors
         projected = projected.float()
